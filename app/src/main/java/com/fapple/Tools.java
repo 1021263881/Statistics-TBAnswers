@@ -40,22 +40,27 @@ public class Tools
 		 ClipboardManager.getPrimaryClip();
 		 */
 	}
+
+	//Url编码
 	public static String UrlEncodeUtf_8(String str) throws mException
 	{
 		try {
 			return URLEncoder.encode(str, "utf-8");
 		} catch (UnsupportedEncodingException e) {
-			throw new mException("Url编码出错了喵~", "在UrlEncode遇到错误，编码前文本:“" + str + "”错误信息:" + e.toString() + "\n" + e.getMessage());
+			throw new mException("Url编码出错了喵~", "UrlEncode出错，编码前文本:“" + str + "”错误信息:" + e.toString() + "\n" + e.getMessage());
 		}
 	}
+
+	//Url解码
 	public static String UrlDecodeUtf_8(String str)throws mException
 	{
 		try {
 			return URLDecoder.decode(str, "utf-8");
 		} catch (UnsupportedEncodingException e) {
-			throw new mException("Url解码出错了喵~", "在UrlDecode遇到错误，编码前文本:“" + str + "”错误信息:" + e.toString() + "\n" + e.getMessage());
+			throw new mException("Url解码出错了喵~", "UrlDecode出错，编码前文本:“" + str + "”错误信息:" + e.toString() + "\n" + e.getMessage());
 		}
 	}
+
 	//index re0
 	public static String ZZ(String str, String biaodashi, Boolean daxiaoxie, Integer index)
 	{
@@ -69,12 +74,10 @@ public class Tools
 			pa = Pattern.compile(biaodashi, Pattern.CASE_INSENSITIVE);
 		}
 		Matcher ma = pa.matcher(str);
-		//ma.matches();
-		//String b;
 		for (int i = 0; i < index; i++) {
-			if(ma.find()){
+			if (ma.find()) {
 				ma.group();
-			}else{
+			} else {
 				break;
 			}
 		}
@@ -98,8 +101,7 @@ public class Tools
 		}
 		Matcher ma = pa.matcher(str);
 		//ma.matches();
-		while(ma.find())
-		{
+		while (ma.find()) {
 			list.add(ma.group());
 		}
 		return list;
@@ -114,6 +116,7 @@ public class Tools
 		re += r;
 		return re;
 	}
+
 	public static String getMD5(String content) throws mException
 	{
 		MessageDigest digest;
@@ -134,6 +137,7 @@ public class Tools
         }
         return builder.toString().toLowerCase();
     }
+
 	public class TB
 	{
 		HttpService httpService = new HttpService();
@@ -141,18 +145,18 @@ public class Tools
 		{
 			return "wappc_" + newNumber(5) + newNumber(4) + newNumber(4) + "_" + newNumber(3);
 		}
-		
+
 		private String sign(String str)throws mException
 		{
 			return getMD5(UrlDecodeUtf_8(str.replace("&", "")) + "tiebaclient!!!").toUpperCase();
 		}
-		
-		public ArrayList<Integer> getMax() throws mException{
+
+		public ArrayList<Integer> getMax() throws mException
+		{
 			String url = "https://tieba.baidu.com/p/4592800021?last=1";
 			String thing = httpService.get(url, "");
 			ArrayList<Integer> all = new ArrayList<Integer>();
-			if(thing != "" && thing != null)
-			{
+			if (thing != "" && thing != null) {
 				String maxpage = ZZ(thing, "第\\d+/\\d+页", false, 0);
 				maxpage = ZZ(maxpage, "\\d+", false, 1);
 				String maxfloor = "";
@@ -210,8 +214,59 @@ public class Tools
 			data += "&sign=" + sign(data);
 
 			String thing = httpService.post(url, data);
-			
+
 			return list;
+		}
+		private String anaContent()
+		{
+			/*if (内容类型 == "0") {
+				内容参数["内容文本"] += (string)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
+			} else if (内容类型 == "1") {
+				//{"type":1,"link":"网址","text":"网址"}
+				内容参数["内容文本"] += "#链接=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["text"] + "#";
+				//控制台_输出(0, "#链接# " + (string)内容源码["post_list"][内容计数]["content"][文本计数]["link"]);
+			} else if (内容类型 == "2") {
+				内容参数["内容文本"] += "#表情=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["c"] + "#";
+			} else if (内容类型 == "3") {
+				//{"type":3,"src":"链接","bsize":"189,199","size":"49634"}
+				//Console.WriteLine((string)内容源码["post_list"][内容计数]["content"].ToString());
+				//内容参数["内容文本"] += "#图片=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"] + "=MD5=" + tlib.取网络资源MD5((string)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"]) + "=size=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+				内容参数["内容文本"] += "#图片=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"] + "=size=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+			} else if (内容类型 == "4") {
+				内容参数["内容文本"] += "#艾特=" + 内容源码["post_list"][内容计数]["content"][文本计数]["text"].ToString().Replace("@", "") + "#";
+			} else if (内容类型 == "5") {
+				//{"type":5,"e_type":15,"width":"480","height":"480","bsize":"480,480","during_time":"2","origin_size":"168046","text":"http:\/\/tieba.baidu.com\/mo\/q\/movideo\/page?thumbnail=d109b3de9c82d158d3fcee1d880a19d8bc3e421b&video=10363_ed294eae88371575b3dbcf9f1990f68d","link":"http:\/\/tb-video.bdstatic.com\/tieba-smallvideo\/10363_ed294eae88371575b3dbcf9f1990f68d.mp4","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/d109b3de9c82d158d3fcee1d880a19d8bc3e421b.jpg","is_native_app":0,"native_app":[]}
+				内容参数["内容文本"] += "#视频#";
+			} else if (内容类型 == "7") {
+				//{"type":"7","text":"\n"}
+			} else if (内容类型 == "9") {
+				//{"type":"9","text":"6666666","phonetype":"2"}
+				内容参数["内容文本"] += (string)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
+			} else if (内容类型 == "10") {
+				//{"type":"10","during_time":"15000","voice_md5":"e25ef2db5076f825e229c6cdb1613f38_1064475243"}
+				内容参数["内容文本"] += "#语音=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["voice_md5"] + "," + (string)内容源码["post_list"][内容计数]["content"][文本计数]["during_time"] + "#";
+			} else if (内容类型 == "11") {
+				//{"type":"11","c":"白发魔女传之明月天国_女屌丝","static":"png静态图链接","dynamic":"gif动态图链接","height":"160","width":"160","icon":"http://tb2.bdstatic.com/tb/editor/images/faceshop/1058_baifa/panel.png","packet_name":"白发魔女传之明月天国"}
+				内容参数["内容文本"] += "#表情=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["c"] + "#";
+			} else if (内容类型 == "16") {
+				//{"type":"16","bsize":"560,560","graffiti_info":{"url":"jpg网页端原图","gid":"123456"},"cdn_src":"客户端缩略图","big_cdn_src":"客户端大图"}
+				//内容参数["内容文本"] += "#图片=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"] + "=MD5=" + tlib.取网络资源MD5((string)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"]) + "=size=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+
+				内容参数["内容文本"] += "#图片=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"] + "=size=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+			} else if (内容类型 == "17") {
+				//{"type":"17","high_together":{"album_id":"478448408116821906","album_name":"关于众筹西游记歌曲演唱会活动","start_time":"0","end_time":"0","location":"","num_join":"0","pic_urls":[]}}
+				内容参数["内容文本"] += "#活动=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["album_name"] + "#";
+			} else if (内容类型 == "18") {
+				//{"type":"18","text":"#白狐狸不改国庆礼包就滚出dnf#","link":"http://tieba.baidu.com/mo/q/hotMessage?topic_id=0&topic_name=白狐狸不改国庆礼包就滚出dnf"}
+				内容参数["内容文本"] += "#热议=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["text"] + "#";
+			} else if (内容类型 == "20") {
+				//{"type":"20","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","bsize":"375,348","meme_info":{"pck_id":"0","pic_id":"47098639564","width":"375","height":"348","pic_url":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","thumbnail":"http:\/\/imgsrc.baidu.com\/forum\/abpic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","detail_link":"http:\/\/tieba.baidu.com\/n\/interact\/emoticon\/0\/47098639564?frompb=1"}}
+
+				//内容参数["内容文本"] += "#图片=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["src"] + "=MD5=" + tlib.取网络资源MD5((string)内容源码["post_list"][内容计数]["content"][文本计数]["src"]) + "=size=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+
+				内容参数["内容文本"] += "#图片=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["src"] + "=size=" + (string)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+			}*/
+			return null;
 		}
 	}
 	public class HttpService
@@ -232,7 +287,7 @@ public class Tools
 			} catch (ExecutionException e) {
 				throw new mException("好像遇到了些奇怪的错误汪~", "Get出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
 			}
-			if(re == "" || re == null){
+			if (re == "" || re == null) {
 				throw new mException("网络好像出了点问题喵~", "Get无接收，URL“" + Url + "”，Data:“" + data + "”");
 			}
 			return re;
@@ -253,7 +308,7 @@ public class Tools
 			} catch (ExecutionException e) {
 				throw new mException("好像遇到了些奇怪的错误汪~", "Post出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
 			}
-			if(re == "" || re == null){
+			if (re == "" || re == null) {
 				throw new mException("网络好像出了点问题喵~", "Post无接收，URL“" + Url + "”，Data:“" + data + "”");
 			}
 			return re;
@@ -372,13 +427,13 @@ public class Tools
 
 			// 配置请求Content-Type
 			urlConn.setRequestProperty("Content-Type", "application/json");
-			
+
 			//设置请求体的类型是文本类型
 			urlConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			
+
 			//设置请求体的长度
 			urlConn.setRequestProperty("Content-Length", String.valueOf(postData.length));
-			
+
 			// 开始连接
 			urlConn.connect();
 
