@@ -9,7 +9,6 @@ import android.view.inputmethod.*;
 import android.webkit.*;
 import android.widget.*;
 import com.fapple.*;
-import java.util.concurrent.*;
 import java.util.*;
 
 public class MainActivity extends Activity 
@@ -124,7 +123,8 @@ public class MainActivity extends Activity
 
 					String aa="中石化";
 					try {
-						aa = tb.get帖子("", "4592800021", 1, true).get(0);
+						//aa = tb.get帖子("", "4592800021", pagemax, pagemax, true).get(0);
+						aa = tb.getlzl("", "4592800021", "117986166537", 1).get(0);
 					} catch (mException e) {
 						showWarning("", e.getMessage(), e.getMore());
 					}
@@ -138,8 +138,10 @@ public class MainActivity extends Activity
 							public void onFocusChange(View p1, boolean p2)
 							{
 								if (p2) {
+									//展开软键盘
 									InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);//得到系统的输入方法服务
 									imm.showSoftInput(p1, 0);
+									
 									setJumpDialogEdit_TextColor(jumppageedit, jumppagetext, R.color.mdblack);
 									jumpfloorbutton.setChecked(false);
 									setJumpDialogEdit_TextColor(jumpflooredit, jumpfloortext, R.color.mdblack_f);
@@ -224,8 +226,15 @@ public class MainActivity extends Activity
 	private void freshmax()
 	{
 		waitDialog("正在获取信息...");
+		ArrayList<Integer> ma;
 		try {
-			ArrayList<Integer> ma = tb.getMax();
+			ma = tb.getMax();
+		} catch (mException e) {
+			ma = null;
+			showWarning("", e.getMessage(), e.getMore());
+		} 
+		if(ma != null)
+		{
 			pagemax = ma.get(0);
 			floormax = ma.get(1);
 			String te = "";
@@ -238,9 +247,6 @@ public class MainActivity extends Activity
 			te += floormax;
 			te += "层";
 			midtext.setText(te);
-		} catch (mException e) {
-			showWarning("", e.getMessage(), e.getMore());
-		} finally {
 			continueForWait();
 		}
 	}
@@ -281,8 +287,12 @@ public class MainActivity extends Activity
 			});
 		warn.show();
 	}
-	private void waitDialog(String message)
+	public void waitDialog(String message)
 	{
+		if(pd != null){
+			pd.dismiss();
+			pd = null;
+		}
 		//等待框，下面是对应的关闭函数
 		if (pd == null) {
 			pd = new ProgressDialog(MainActivity.this);

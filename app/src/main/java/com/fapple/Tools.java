@@ -184,7 +184,7 @@ public class Tools
 			data += "&sign=" + sign(data);
 			return list;
 		}
-		public ArrayList<String> get帖子(String cookie, String tid, Integer pn, Boolean daoxu) throws mException
+		public ArrayList<String> get帖子(String cookie, String tid, Integer pn, Integer mpn, Boolean daoxu) throws mException
 		{
 			ArrayList<String> list = new ArrayList<String>();
 			String url = "http://c.tieba.baidu.com/c/f/pb/page";
@@ -192,8 +192,11 @@ public class Tools
 			data += "&_client_id=" + getStamp();
 			data += "&_client_type=2&_client_version=8.8.8.3";
 			data += "&kz=" + tid;
-			if (daoxu) {
+			if (daoxu == true && pn == mpn) {
 				data += "&last=1&r=1";
+			}else if(daoxu == true){
+				data += "&pn=" + pn;
+				data += "&r=1";
 			}else{
 				data += "&pn=" + pn;
 			}
@@ -216,7 +219,7 @@ public class Tools
 			data += "&sign=" + sign(data);
 
 			String thing = httpService.post(url, data);
-
+			list.add(thing);
 			return list;
 		}
 		private String anaContent()
