@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="horizontal"
+	android:gravity="left">
+
+	<TextView
+		android:layout_height="match_parent"
+		android:layout_width="wrap_content"
+		android:textSize="18sp"
+		android:gravity="left|center"
+		android:paddingLeft="10dp"
+		android:ems="8"
+		android:id="@+id/persontext"/>
+
+	<Button
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_marginLeft="30dp"
+		android:layout_marginRight="10dp"
+		android:ems="8"
+		android:id="@+id/personbutton"/>
+
+</LinearLayout>
+
