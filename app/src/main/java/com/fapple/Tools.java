@@ -192,10 +192,12 @@ public class Tools
 			data += "&_client_id=" + getStamp();
 			data += "&_client_type=2&_client_version=8.8.8.3";
 			data += "&kz=" + tid;
-			data += "&pn=" + pn;
-			//if (daoxu) {
+			if (daoxu) {
 				data += "&last=1&r=1";
-			//}
+			}else{
+				data += "&pn=" + pn;
+			}
+			//data += "&back=1&banner=0";
 			data += "&sign=" + sign(data);
 			String thing = httpService.post(url, data);
 			list.add(thing);

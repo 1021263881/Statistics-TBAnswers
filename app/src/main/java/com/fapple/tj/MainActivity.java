@@ -124,7 +124,7 @@ public class MainActivity extends Activity
 
 					String aa="中石化";
 					try {
-						aa = tb.get帖子("", "4592800021", 1, false).get(0);
+						aa = tb.get帖子("", "4592800021", 1, true).get(0);
 					} catch (mException e) {
 						showWarning("", e.getMessage(), e.getMore());
 					}
