@@ -119,16 +119,12 @@ public class MainActivity extends Activity
 					jumpfloortext = (TextView)mdialog.findViewById(R.id.jumpfloortext);
 
 					//设置初始色
-					jumppageedit.setTextColor(getResources().getColor(R.color.mdblack_f));
-					jumppagetext.setTextColor(getResources().getColor(R.color.mdblack_f));
-					jumpflooredit.setTextColor(getResources().getColor(R.color.mdblack_f));
-					jumpfloortext.setTextColor(getResources().getColor(R.color.mdblack_f));
+					setJumpDialogEdit_TextColor(jumppageedit, jumppagetext, R.color.mdblack_f);
+					setJumpDialogEdit_TextColor(jumpflooredit, jumpfloortext, R.color.mdblack_f);
 
 					String aa="中石化";
 					try {
-						//aa = httpservice.post("http://s2.int100.org/auth/login", "email=1021263881@qq.com&passwd=38842598&remember_me=0");
-						//aa = tb.get帖子("", "4592800021", 1, true).get(0);
-						aa = tool.getMD5("你a");
+						aa = tb.get帖子("", "4592800021", 1, false).get(0);
 					} catch (mException e) {
 						showWarning("", e.getMessage(), e.getMore());
 					}
