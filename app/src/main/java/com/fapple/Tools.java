@@ -193,9 +193,9 @@ public class Tools
 			data += "&_client_type=2&_client_version=8.8.8.3";
 			data += "&kz=" + tid;
 			data += "&pn=" + pn;
-			if (daoxu) {
-				data += "&r=1";
-			}
+			//if (daoxu) {
+				data += "&last=1&r=1";
+			//}
 			data += "&sign=" + sign(data);
 			String thing = httpService.post(url, data);
 			list.add(thing);
@@ -331,7 +331,7 @@ public class Tools
 					case "GET":
 						return Get(Url, data);
 					case "POST":
-						return Post(Url, data);
+						return Post_(Url, data);
 					default:
 						return "Error Method!";
 				}
@@ -389,6 +389,7 @@ public class Tools
 			urlConn.disconnect();
 			return result;
 		}
+		/*
 		private String Post(String Url, String data)throws  UnsupportedEncodingException, IOException
 		{
 			//string转URL(utf-8)编码
@@ -459,7 +460,38 @@ public class Tools
 			return result;
 			//Log.e(TAG, e.toString());
 		}
+		*/
+		private String Post_(String path, String Info) throws IOException
+		{ 
 
+			//1, 得到URL对象 
+			URL url = new URL(path); 
+
+			//2, 打开连接 
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection(); 
+
+			//3, 设置提交类型 
+			conn.setRequestMethod("POST"); 
+
+			//4, 设置允许写出数据,默认是不允许 false 
+			conn.setDoOutput(true); 
+			conn.setDoInput(true);//当前的连接可以从服务器读取内容, 默认是true 
+
+			//5, 获取向服务器写出数据的流 
+			OutputStream os = conn.getOutputStream(); 
+			//参数是键值队  , 不以"?"开始 
+			os.write(Info.getBytes()); 
+			//os.write("googleTokenKey=&username=admin&password=5df5c29ae86331e1b5b526ad90d767e4".getBytes()); 
+			os.flush();
+			//6, 获取响应的数据 
+			//得到服务器写回的响应数据 
+			BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream(),"utf-8"));
+			String str = br.readLine();   
+			//System.out.println("响应内容为:  " + str); 
+
+			return  str;
+		}
+		
 		/**
 		 * 将输入流转换成字符串
 		 *
