@@ -11,8 +11,7 @@
 		android:layout_width="wrap_content"
 		android:orientation="horizontal"
 		android:gravity="center"
-		android:focusable="true"  
-   
+		android:focusable="true"
 		android:focusableInTouchMode="true">
 
 		<RadioButton
@@ -33,7 +32,8 @@
 			android:layout_width="wrap_content"
 			android:text="Text"
 			android:textSize="18sp"
-			android:id="@+id/jumppagetext"/>
+			android:id="@+id/jumppagetext"
+			android:ems="4"/>
 
 	</LinearLayout>
 
@@ -42,8 +42,7 @@
 		android:layout_width="wrap_content"
 		android:orientation="horizontal"
 		android:gravity="center"
-		android:focusable="true"  
-   
+		android:focusable="true"
 		android:focusableInTouchMode="true">
 
 		<RadioButton
@@ -64,7 +63,8 @@
 			android:layout_width="wrap_content"
 			android:text="Text"
 			android:textSize="18sp"
-			android:id="@+id/jumpfloortext"/>
+			android:id="@+id/jumpfloortext"
+			android:ems="4"/>
 
 	</LinearLayout>
 

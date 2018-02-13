@@ -16,10 +16,10 @@ public final class R {
     }
     public static final class drawable {
         public static final int ic_launcher=0x7f020000;
-        public static final int ic_remove_black_48dp=0x7f020001;
-        public static final int jump=0x7f020002;
-        public static final int lastbutton=0x7f020003;
-        public static final int nextbutton=0x7f020004;
+        public static final int jump=0x7f020001;
+        public static final int lastbutton=0x7f020002;
+        public static final int nextbutton=0x7f020003;
+        public static final int none=0x7f020004;
         public static final int ojbk=0x7f020005;
         public static final int warning=0x7f020006;
         public static final int well=0x7f020007;
@@ -34,10 +34,12 @@ public final class R {
         public static final int jumppage=0x7f070004;
         public static final int jumppagebutton=0x7f070003;
         public static final int jumppagetext=0x7f070005;
+        public static final int mainLinearLayout=0x7f07000b;
         public static final int mainScrollView=0x7f07000a;
         public static final int mainWebView=0x7f070009;
-        public static final int personbutton=0x7f07000c;
-        public static final int persontext=0x7f07000b;
+        public static final int personNiCheng=0x7f07000d;
+        public static final int personbutton=0x7f07000e;
+        public static final int personid=0x7f07000c;
     }
     public static final class layout {
         public static final int actionbar=0x7f030000;

@@ -2,14 +2,20 @@ package com.fapple.tj;
 
 import android.app.*;
 import android.content.*;
+import android.graphics.drawable.*;
 import android.os.*;
 import android.view.*;
 import android.view.View.*;
 import android.view.inputmethod.*;
 import android.webkit.*;
 import android.widget.*;
+import android.widget.RelativeLayout.*;
 import com.fapple.*;
 import java.util.*;
+
+import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
+import android.view.View.OnLongClickListener;
 
 public class MainActivity extends Activity 
 {
@@ -18,9 +24,10 @@ public class MainActivity extends Activity
 	private Tools.TB tb = tool.new TB();
 	private ClipboardManager cm = null;
 	private ProgressDialog pd = null;
+	private LinearLayout.LayoutParams personlp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
-	WebView web;
-	ScrollView list;
+	private WebView web;
+	private LinearLayout list;
 	private ActionBar actionbar;
 	private View actionbarview;
 	private Button lastbutton;
@@ -39,10 +46,24 @@ public class MainActivity extends Activity
 	EditText jumpflooredit;
 	TextView jumpfloortext;
 
-	private Integer pagemax = 1;
-	private Integer pagenow = 1;
-	private Integer floormax = 1;
-	private Integer floornow = 1;
+	//仨背景
+	private Drawable ojbk;
+	private Drawable well;
+	private Drawable none;
+
+	//personButton监听
+	private OnClickListener personb;
+	private View person;
+
+	private int pagemax = 1;
+	private int pagenow = 1;
+	private int floormax = 1;
+	private int floornow = 1;
+
+	private int hasCopy = 0;
+
+	private HashMap<String, HashMap<String, String>> tj = new HashMap<String, HashMap<String, String>>();
+	private HashMap<String, String> ntj = new HashMap<String, String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -52,6 +73,41 @@ public class MainActivity extends Activity
 
 		//获取剪贴板
 		cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+
+		//获取图片
+		ojbk = getResources().getDrawable(R.drawable.ojbk);
+		well = getResources().getDrawable(R.drawable.well);
+		none = getResources().getDrawable(R.drawable.none);
+
+		//设置ntj模板
+		ntj.put("nicheng", "");
+		ntj.put("yx", "1");
+		ntj.put("gzl", "0");
+
+		//设置personButton监听器
+		personb = new OnClickListener(){
+			@Override
+			public void onClick(View p1)
+			{
+				Drawable pbuttonback = p1.getBackground();
+				TextView id = (TextView)((View)p1.getParent()).findViewById(R.id.personid);
+				TextView nicheng = (TextView)((View)p1.getParent()).findViewById(R.id.personNiCheng);
+				int did = 0;
+				if (pbuttonback == none) {
+					p1.setBackground(ojbk);
+					did = 1;
+				} else if (pbuttonback == ojbk) {
+					p1.setBackground(well);
+					did = 2;
+				} else if (pbuttonback == well) {
+					p1.setBackground(none);
+					did = -1;
+				}
+				if (did != 0) {
+					updatePerson(did, id.getText().toString(), nicheng.getText().toString());
+				}
+			}
+		};
 
 		//设置ActionBar
 		actionbar = getActionBar();
@@ -117,6 +173,10 @@ public class MainActivity extends Activity
 					jumpflooredit = (EditText)mdialog.findViewById(R.id.jumpfloor);
 					jumpfloortext = (TextView)mdialog.findViewById(R.id.jumpfloortext);
 
+					//设置文字
+					jumppagetext.setText("/" + String.valueOf(pagemax) + "页");
+					jumpfloortext.setText("/" + String.valueOf(floormax) + "楼");
+
 					//设置初始色
 					setJumpDialogEdit_TextColor(jumppageedit, jumppagetext, R.color.mdblack_f);
 					setJumpDialogEdit_TextColor(jumpflooredit, jumpfloortext, R.color.mdblack_f);
@@ -124,10 +184,12 @@ public class MainActivity extends Activity
 					String aa="中石化";
 					try {
 						//aa = tb.get帖子("", "4592800021", pagemax, pagemax, true).get(0);
-						aa = tb.getlzl("", "4592800021", "117986166537", 1).get(0);
+						aa = tb.getfloor("", "4592800021", "91112608095", 1).get(0);
 					} catch (mException e) {
 						showWarning("", e.getMessage(), e.getMore());
 					}
+					//aa = tj.get("102").get("yx");
+
 					Toast.makeText(MainActivity.this, "get√", 0).show();
 					tool.copyToClipBoard(cm, aa);
 					tool.loadHtmlInWebview(web, aa);
@@ -141,7 +203,7 @@ public class MainActivity extends Activity
 									//展开软键盘
 									InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);//得到系统的输入方法服务
 									imm.showSoftInput(p1, 0);
-									
+
 									setJumpDialogEdit_TextColor(jumppageedit, jumppagetext, R.color.mdblack);
 									jumpfloorbutton.setChecked(false);
 									setJumpDialogEdit_TextColor(jumpflooredit, jumpfloortext, R.color.mdblack_f);
@@ -153,8 +215,10 @@ public class MainActivity extends Activity
 							public void onFocusChange(View p1, boolean p2)
 							{
 								if (p2) {
+									//展开软键盘
 									InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);//得到系统的输入方法服务
 									imm.showSoftInput(p1, 0);
+
 									setJumpDialogEdit_TextColor(jumpflooredit, jumpfloortext, R.color.mdblack);
 									jumppagebutton.setChecked(false);
 									setJumpDialogEdit_TextColor(jumppageedit, jumppagetext, R.color.mdblack_f);
@@ -186,6 +250,7 @@ public class MainActivity extends Activity
 				public boolean onLongClick(View p1)
 				{
 					Toast.makeText(MainActivity.this, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+					hasCopy = 1;
 					return true;
 				}
 			});
@@ -209,7 +274,7 @@ public class MainActivity extends Activity
 		web = (WebView)findViewById(R.id.mainWebView);
 
 		//获取ScrollView
-		list = (ScrollView)findViewById(R.id.mainScrollView);
+		list = (LinearLayout)findViewById(R.id.mainLinearLayout);
 		/*try
 		 {
 		 tool.loadHtmlInWebview(web, get("http://tieba.baidu.com", ""));
@@ -223,32 +288,115 @@ public class MainActivity extends Activity
 		 Toast.makeText(MainActivity.this, e.toString(), 0).show();
 		 }*/
 	}
-	private void freshmax()
+	//统计
+	private Boolean updatePerson(int did, String id, String nicheng)
+	{
+		hasCopy = 0;
+		switch (did) {
+			case 1/*有效*/:
+				if (tj.containsKey(id)) {
+					int old = Integer.valueOf(tj.get(id).get("yx"));
+					if (tj.get(id).replace("yx", String.valueOf(old), String.valueOf(old + 1))) {
+						return true;
+					}
+				} else {
+					tj.put(id, ntj);
+					tj.get(id).replace("nicheng", "", nicheng);
+				}
+				break;
+			case 2/*高质量*/:
+				if (tj.containsKey(id)) {
+					return false;
+				} else {
+					int old = Integer.valueOf(tj.get(id).get("gzl"));
+					if (tj.get(id).replace("gzl", String.valueOf(old), String.valueOf(old + 1))) {
+						return true;
+					}
+				}
+				break;
+			case -1/*无效*/:
+				if (tj.containsKey(id)) {
+					return false;
+				} else {
+					int old = Integer.valueOf(tj.get(id).get("yx"));
+					int oldg = Integer.valueOf(tj.get(id).get("gzl"));
+					if (old == 1) {
+						tj.remove(id);
+					} else {
+						tj.get(id).replace("yx", String.valueOf(old), String.valueOf(old - 1));
+						tj.get(id).replace("gzl", String.valueOf(oldg), String.valueOf(oldg - 1));
+					}
+				}
+				break;
+		}
+		return false;
+	}
+	//更新名单
+	public Boolean updatePersonList(ArrayList<HashMap<String, String>> personlist)
+	{
+		//清空内容
+		if (list.getChildCount() != 0) {
+			list.removeAllViews();
+		}
+
+		int ma = personlist.size();
+		for (int i = 0; i < ma; i++) {
+			person = View.inflate(MainActivity.this, R.layout.person, null);
+
+			//设置id, 昵称
+			((TextView)person.findViewById(R.id.personid)).setText(personlist.get(i).get("id"));
+			((TextView)person.findViewById(R.id.personNiCheng)).setText(personlist.get(i).get("nicheng"));
+
+			//设置按钮监听
+			person.findViewById(R.id.personbutton).setBackground(none);
+			person.findViewById(R.id.personbutton).setOnClickListener(personb);
+			list.addView(person, personlp);
+		}
+
+		person = View.inflate(MainActivity.this, R.layout.person, null);
+		person.findViewById(R.id.personbutton).setOnClickListener(personb);
+		list.addView(person, personlp);
+		if (list.getChildCount() == personlist.size()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public void freshmax()
 	{
 		waitDialog("正在获取信息...");
-		ArrayList<Integer> ma;
-		try {
-			ma = tb.getMax();
-		} catch (mException e) {
-			ma = null;
-			showWarning("", e.getMessage(), e.getMore());
-		} 
-		if(ma != null)
-		{
-			pagemax = ma.get(0);
-			floormax = ma.get(1);
-			String te = "";
-			te += pagenow;
-			te += "/";
-			te += pagemax;
-			te += "页 ";
-			te += floornow;
-			te += "/";
-			te += floormax;
-			te += "层";
-			midtext.setText(te);
-			continueForWait();
+		if (pagemax == 1 && floormax == 1) {
+			ArrayList<Integer> ma;
+			try {
+				ma = tb.getMax();
+			} catch (mException e) {
+				ma = null;
+				showWarning("", e.getMessage(), e.getMore());
+			} 
+			if (ma != null) {
+				pagemax = ma.get(0);
+				floormax = ma.get(1);
+			}
 		}
+		String te = "";
+		te += pagenow;
+		te += "/";
+		te += pagemax;
+		te += "页 ";
+		te += floornow;
+		te += "/";
+		te += floormax;
+		te += "层";
+		midtext.setText(te);
+		continueForWait();
+	}
+	public void setPageMax(int num)
+	{
+		pagemax = num;
+	}
+	public void setFloorMax(int num)
+	{
+		floormax = num;
 	}
 	private void setJumpDialogEdit_TextColor(EditText edit, TextView text, int colorid)
 	{
@@ -271,7 +419,7 @@ public class MainActivity extends Activity
 	private void showWarning(String title, String message, final String more)
 	{
 		AlertDialog.Builder warn = new AlertDialog.Builder(MainActivity.this);
-		if(title == "" || title == null){
+		if (title == "" || title == null) {
 			title = "哎呦，好像遇到错误了";
 		}
 		warn.setTitle(title);
@@ -289,7 +437,7 @@ public class MainActivity extends Activity
 	}
 	public void waitDialog(String message)
 	{
-		if(pd != null){
+		if (pd != null) {
 			pd.dismiss();
 			pd = null;
 		}
