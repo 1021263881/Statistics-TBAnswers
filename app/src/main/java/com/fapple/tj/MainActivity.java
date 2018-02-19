@@ -182,12 +182,12 @@ public class MainActivity extends Activity
 					setJumpDialogEdit_TextColor(jumpflooredit, jumpfloortext, R.color.mdblack_f);
 
 					String aa="中石化";
-					try {
+					/*try {
 						//aa = tb.get帖子("", "4592800021", pagemax, pagemax, true).get(0);
-						aa = tb.getfloor("", "4592800021", "91112608095", 1).get(0);
+						//aa = tb.getfloor("", "4592800021", "91112608095", 1).get(0);
 					} catch (mException e) {
 						showWarning("", e.getMessage(), e.getMore());
-					}
+					}*/
 					//aa = tj.get("102").get("yx");
 
 					Toast.makeText(MainActivity.this, "get√", 0).show();
