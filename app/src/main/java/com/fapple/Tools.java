@@ -8,7 +8,6 @@ import java.security.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
-import com.fapple.tj.*;
 import org.json.*;
 import android.util.*;
 
@@ -142,23 +141,39 @@ public class Tools
 
 	public class TB
 	{
-		private int pagemax;
+		private int pagemax = 1;
 		private int pagenow = 1;
-		private int floormax;
+		private int floormax = 1;
 		private int floornow = 1;
+		private int indexInList = 0;
 
-		ArrayMap<String, String> floor = new ArrayMap<String, String>();
-		ArrayMap<String, String> lzl = new ArrayMap<String, String>();
+		ArrayMap<Integer, ArrayList<HashMap<String, String>>> floor = new ArrayMap<Integer, ArrayList<HashMap<String, String>>>();
+		ArrayMap<String, ArrayMap<String, String>> lzl = new ArrayMap<String, ArrayMap<String, String>>();
+
+		HashMap<String, String> mfloor = new HashMap<String, String>();
+		HashMap<String, String> mlzl = new HashMap<String, String>();
 
 		HttpService httpService = new HttpService();
 
 		public TB()
 		{
 			//初始化楼层
-			floor.put("id", "");
-			floor.put("nicheng", "");
-			floor.put("time", "");
-			floor.put("pid", "");
+			mfloor.put("pid", "");
+			mfloor.put("id", "");
+			mfloor.put("nicheng", "");
+			mfloor.put("level", "");
+			mfloor.put("content", "");
+			mfloor.put("floor", "");
+			mfloor.put("time", "");
+
+			//初始化楼中楼
+			mlzl.put("pid", "");
+			mlzl.put("spid", "");
+			mlzl.put("id", "");
+			mlzl.put("nicheng", "");
+			mlzl.put("level", "");
+			mlzl.put("content", "");
+			mlzl.put("time", "");
 		}
 
 		private String getStamp()
@@ -198,6 +213,34 @@ public class Tools
 		{
 			return floormax;
 		}
+		public int getPageNow()
+		{
+			return pagenow;
+		}
+		public int getFloorNow()
+		{
+			return floornow;
+		}
+		public ArrayList<String> getNextFloor()
+		{
+			return null;
+		}
+		public ArrayList<String> getNextPage()
+		{
+			if (pagenow < pagemax) {
+				pagenow ++;
+				return setPage(pagenow);
+			} else {
+				return null;
+			}
+		}
+		public ArrayList<String> setPage(int page)
+		{
+			indexInList = 0;
+			return null;
+		}
+
+		/*-------------------------内部处理--------------------------*/
 		private ArrayList<String> 获取主题列表(String cookie, String tiebaname, int pn) throws mException
         {
 			ArrayList<String> list = new ArrayList<String>();
@@ -215,7 +258,7 @@ public class Tools
 			data += "&sign=" + sign(data);
 			return list;
 		}
-		private JSONArray getpage(String cookie, String tid, int pn, int mpn, Boolean daoxu) throws mException
+		private JSONArray getPage(String cookie, String tid, int pn, int mpn, Boolean daoxu) throws mException
 		{
 			String url = "http://c.tieba.baidu.com/c/f/pb/page";
 			String data = cookie;
@@ -240,10 +283,10 @@ public class Tools
 			} catch (JSONException e) {
 				throw new mException("JSON解析好像遇到问题了", "JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
 			}
-			pagemax = page.optJSONObject("page").optInt("total_page");
+			pagemax = page.optJSONObject("page").optInt("total_page", pagemax);
 			return page.optJSONArray("post_list");
 		}
-		private JSONObject getfloor(String cookie, String tid, String pid, int pn) throws mException
+		private JSONObject getFloor(String cookie, String tid, String pid, int pn) throws mException
         {
             String url = "http://c.tieba.baidu.com/c/f/pb/floor";
             String data = cookie;
@@ -262,19 +305,29 @@ public class Tools
 			} catch (JSONException e) {
 				throw new mException("JSON解析好像遇到问题了", "JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
 			}
-			return floor.optJSONObject("a");
+			return floor.optJSONObject("subpost_list");
 		}
-		public HashMap<Integer, HashMap<String, String>> anaPage(JSONArray list)
+		private void anaPage(JSONArray list)
 		{
 			int len = list.length();
 			if (len < 1) {
-				return null;
+				return ;
 			}
-			HashMap<Integer, HashMap<String, String>> tz = new HashMap<Integer, HashMap<String, String>>();
+			JSONObject fl;
+			int flnum;
 			for (int i = 0;i < len; i++) {
+				fl = list.optJSONObject(i);
+				flnum = fl.optInt("floor", -1);
+				if (flnum == -1) {
+					continue;
+				}
+				floor.put(flnum, mfloor);
 
 			}
-			return tz;
+		}
+		private void anaFloor(JSONArray list)
+		{
+
 		}
 		private String anaContent(JSONArray content)
 		{
@@ -283,12 +336,13 @@ public class Tools
 				return null;
 			}
 			String text = "";
-			for(int i = 0; i < len; i++){
-				text += classifyToHtml(content.optJSONObject(i));
+			for (int i = 0; i < len; i++) {
+				text += anaContentToHtml(content.optJSONObject(i));
 			}
 			return null;
 		}
-		private String classifyToHtml(JSONObject content){
+		private String anaContentToHtml(JSONObject content)
+		{
 			String type = content.optString("type", "0");
 			String thing = "";
 			if (type == "0") {
@@ -316,7 +370,8 @@ public class Tools
 				thing += "<br>";
 			} else if (type == "9") {
 				//{"type":"9","text":"6666666","phonetype":"2"}
-				thing += (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
+				//thing += (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
+				thing += content.optString("text", "");
 			} else if (type == "10") {
 				//{"type":"10","during_time":"15000","voice_md5":"e25ef2db5076f825e229c6cdb1613f38_1064475243"}
 				//thing += "#语音=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["voice_md5"] + "," + (String)内容源码["post_list"][内容计数]["content"][文本计数]["during_time"] + "#";
