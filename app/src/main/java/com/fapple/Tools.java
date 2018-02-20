@@ -62,7 +62,7 @@ public class Tools
 		}
 	}
 
-	//index re0
+	//正则匹配 index re0
 	public static String ZZ(String str, String biaodashi, Boolean daxiaoxie, int index)
 	{
 		if (str == "" || str == null || biaodashi == "" || biaodashi == null || index < 0) {
@@ -107,6 +107,8 @@ public class Tools
 		}
 		return list;
 	}
+	
+	//产生一个新的随机数，传参随意位数
 	public String newNumber(int num)
 	{
 		num --;
@@ -258,19 +260,19 @@ public class Tools
 			data += "&sign=" + sign(data);
 			return list;
 		}
-		private JSONArray getPage(String cookie, String tid, int pn, int mpn, Boolean daoxu) throws mException
+		private JSONArray getPage(String cookie, String tid, int pn, Boolean daoxu) throws mException
 		{
 			String url = "http://c.tieba.baidu.com/c/f/pb/page";
 			String data = cookie;
 			data += "&_client_id=" + getStamp();
 			data += "&_client_type=2&_client_version=8.8.8.3";
 			data += "&kz=" + tid;
-			if (daoxu == true && pn == mpn) {
+			if (daoxu == true/* && pn == mpn*/) {
 				data += "&last=1&r=1";
-			} else if (daoxu == true) {
+			}/* else if (daoxu == true) {
 				data += "&pn=" + pn;
 				data += "&r=1";
-			} else {
+			}*/ else {
 				data += "&pn=" + pn;
 			}
 			data += "&sign=" + sign(data);
@@ -307,22 +309,17 @@ public class Tools
 			}
 			return floor.optJSONObject("subpost_list");
 		}
-		private void anaPage(JSONArray list)
+		private void anaPage(JSONArray list, int page)
 		{
 			int len = list.length();
 			if (len < 1) {
 				return ;
 			}
+			ArrayList<HashMap<String, String>> floorlist = new ArrayList<HashMap<String, String>>();
 			JSONObject fl;
-			int flnum;
 			for (int i = 0;i < len; i++) {
 				fl = list.optJSONObject(i);
-				flnum = fl.optInt("floor", -1);
-				if (flnum == -1) {
-					continue;
-				}
-				floor.put(flnum, mfloor);
-
+				
 			}
 		}
 		private void anaFloor(JSONArray list)
