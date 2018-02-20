@@ -20,7 +20,8 @@
 		android:lines="1"
 		android:gravity="center"
 		android:textSize="22sp"
-		android:id="@+id/actionbarmidtext"/>
+		android:id="@+id/actionbarmidtext"
+		android:ems="9"/>
 
 	<Button
 		android:layout_height="24dp"

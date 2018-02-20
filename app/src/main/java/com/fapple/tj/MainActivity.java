@@ -22,7 +22,7 @@ public class MainActivity extends Activity
 {
 	private Tools tool = new Tools();
 	private Tools.HttpService httpservice = tool.new HttpService();
-	private Tools.TB tb = tool.new TB();
+	private Tools.TB tb = tool.new TB("4592800021");
 	private ClipboardManager cm = null;
 	private ProgressDialog pd = null;
 	private LinearLayout.LayoutParams personlp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -126,7 +126,11 @@ public class MainActivity extends Activity
 				@Override
 				public void onClick(View p1)
 				{
-
+					try {
+						ana(tb.getLastFloor());
+					} catch (mException e) {
+						
+					}
 				}
 			});
 
@@ -136,7 +140,11 @@ public class MainActivity extends Activity
 				@Override
 				public void onClick(View p1)
 				{
-					// TODO: Implement this method
+					try {
+						ana(tb.getNextFloor());
+					} catch (mException e) {
+						
+					}
 				}
 			});
 
@@ -150,29 +158,19 @@ public class MainActivity extends Activity
 					AlertDialog.Builder mdialogb = new AlertDialog.Builder(MainActivity.this);
 					mdialogb.setIcon(R.drawable.jump);
 					mdialogb.setTitle("你倒是选一个跳转方式啊");
-					mdialogb.setView(R.layout.jumpdialog);
-					mdialogb.setNegativeButton("ojbk", new DialogInterface.OnClickListener(){
 
-							@Override
-							public void onClick(DialogInterface p1, int p2)
-							{
-								// TODO: Implement this method
-								Toast.makeText(MainActivity.this, "oojbk", 0).show();
-							}
-						});
-
-					//获取Alert
-					mdialog = mdialogb.show();
+					//得到自定义View的对象
+					View jump = View.inflate(MainActivity.this, R.layout.jumpdialog, null);
 
 					//获取按钮
-					jumppagebutton = (RadioButton)mdialog.findViewById(R.id.jumppagebutton);
-					jumpfloorbutton = (RadioButton)mdialog.findViewById(R.id.jumpfloorbutton);
+					jumppagebutton = (RadioButton)jump.findViewById(R.id.jumppagebutton);
+					jumpfloorbutton = (RadioButton)jump.findViewById(R.id.jumpfloorbutton);
 
 					//获取文本框
-					jumppageedit = (EditText)mdialog.findViewById(R.id.jumppage);
-					jumppagetext = (TextView)mdialog.findViewById(R.id.jumppagetext);
-					jumpflooredit = (EditText)mdialog.findViewById(R.id.jumpfloor);
-					jumpfloortext = (TextView)mdialog.findViewById(R.id.jumpfloortext);
+					jumppageedit = (EditText)jump.findViewById(R.id.jumppage);
+					jumppagetext = (TextView)jump.findViewById(R.id.jumppagetext);
+					jumpflooredit = (EditText)jump.findViewById(R.id.jumpfloor);
+					jumpfloortext = (TextView)jump.findViewById(R.id.jumpfloortext);
 
 					//设置文字
 					jumppagetext.setText("/" + String.valueOf(pagemax) + "页");
@@ -181,25 +179,6 @@ public class MainActivity extends Activity
 					//设置初始色
 					setJumpDialogEdit_TextColor(jumppageedit, jumppagetext, R.color.mdblack_f);
 					setJumpDialogEdit_TextColor(jumpflooredit, jumpfloortext, R.color.mdblack_f);
-
-					String aa="中石化";
-					try {
-						//aa = tb.get帖子("", "4592800021", pagemax, pagemax, true).get(0);
-						aa = tb.getFloor("", "4592800021", "91112608095", 1).toString();
-						//aa = tb.获取主题列表("", "minecraftpe", 1).toString();
-					} catch (mException e) {
-						showWarning("", e.getMessage(), e.getMore());
-					}
-					//aa = tj.get("102").get("yx");
-					ArrayMap<String, String> aaa = new ArrayMap<String, String>();
-					aaa.put("仙山", "仙山快女装");
-					aa = aaa.put("仙山", "仙山援交吧");
-
-					//aa = aaa.get("仙山");
-
-					Toast.makeText(MainActivity.this, "get√", 0).show();
-					tool.copyToClipBoard(cm, aa);
-					tool.loadHtmlInWebview(web, aa);
 
 					//检测焦点改变
 					jumppageedit.setOnFocusChangeListener(new OnFocusChangeListener(){
@@ -248,6 +227,42 @@ public class MainActivity extends Activity
 								jumpflooredit.requestFocus();
 							}
 						});
+
+					//设置view
+					mdialogb.setView(jump);
+
+					mdialogb.setNegativeButton("ojbk", new DialogInterface.OnClickListener(){
+
+							@Override
+							public void onClick(DialogInterface p1, int p2)
+							{
+								// TODO: Implement this method
+								if (jumppagebutton.isChecked() == true) {
+									Toast.makeText(MainActivity.this, "page", 0).show();
+									try {
+										ana(tb.jumpPage(Integer.valueOf(jumppageedit.getText().toString())));
+
+									} catch (mException e) {
+
+									}
+								} else if (jumpfloorbutton.isChecked() == true) {
+									Toast.makeText(MainActivity.this, "floor", 0).show();
+									try {
+										ana(tb.jumpFloor(Integer.valueOf(jumpflooredit.getText().toString())));
+									} catch (mException e) {
+										
+									} catch (NumberFormatException e) {
+										
+									}
+								}
+							}
+						});
+
+					//获取Alert
+					mdialog = mdialogb.show();
+
+					//tool.copyToClipBoard(cm, aa);
+					//tool.loadHtmlInWebview(web, aa);
 				}
 			});
 
@@ -291,18 +306,7 @@ public class MainActivity extends Activity
 
 		//获取ScrollView
 		list = (LinearLayout)findViewById(R.id.mainLinearLayout);
-		/*try
-		 {
-		 tool.loadHtmlInWebview(web, get("http://tieba.baidu.com", ""));
-		 }
-		 catch (InterruptedException e)
-		 {
-		 Toast.makeText(MainActivity.this, e.toString(), 0).show();
-		 }
-		 catch (ExecutionException e)
-		 {
-		 Toast.makeText(MainActivity.this, e.toString(), 0).show();
-		 }*/
+
 	}
 	//统计
 	private Boolean updatePerson(int did, String id, String nicheng)
@@ -349,8 +353,8 @@ public class MainActivity extends Activity
 						old --;
 						oldg --;
 						if (old == Integer.valueOf(tj.get(id).put("yx", String.valueOf(old))) && 
-							oldg == Integer.valueOf(tj.get(id).put("gzl", String.valueOf(oldg)))){
-								return true;
+							oldg == Integer.valueOf(tj.get(id).put("gzl", String.valueOf(oldg)))) {
+							return true;
 						}
 					}
 				}
@@ -358,8 +362,9 @@ public class MainActivity extends Activity
 		}
 		return false;
 	}
+	
 	//更新名单
-	public Boolean updatePersonList(ArrayList<ArrayMap<String, String>> personlist)
+	public Boolean updatePersonList(ArrayList<String> personlist)
 	{
 		//清空内容
 		if (list.getChildCount() != 0) {
@@ -371,12 +376,14 @@ public class MainActivity extends Activity
 			person = View.inflate(MainActivity.this, R.layout.person, null);
 
 			//设置id, 昵称
-			((TextView)person.findViewById(R.id.personid)).setText(personlist.get(i).get("id"));
-			((TextView)person.findViewById(R.id.personNiCheng)).setText(personlist.get(i).get("nicheng"));
+			((TextView)person.findViewById(R.id.personid)).setText(personlist.get(i));
+			i++;
+			((TextView)person.findViewById(R.id.personNiCheng)).setText(personlist.get(i));
 
 			//设置按钮监听
 			person.findViewById(R.id.personbutton).setBackground(none);
 			person.findViewById(R.id.personbutton).setOnClickListener(personb);
+			
 			list.addView(person, personlp);
 		}
 
@@ -389,6 +396,25 @@ public class MainActivity extends Activity
 			return false;
 		}
 	}
+	private void ana(ArrayList<String> list) throws mException
+	{
+		if(list.size() < 5){
+			throw new mException("传值过少", "ana错误, ana.size=" + list.size());
+		}
+		pagenow = Integer.valueOf(list.get(0));
+		pagemax = Integer.valueOf(list.get(1));
+		floornow = Integer.valueOf(list.get(2));
+		floormax = Integer.valueOf(list.get(3));
+		
+		tool.loadHtmlInWebview(web, list.get(4));
+		
+		int len = list.size();
+		ArrayList<String> pr = new ArrayList<String>();
+		for(int i = 5; i < len; i++){
+			pr.add(list.get(i));
+		}
+		updatePersonList(pr);
+	}
 	public void freshmax()
 	{
 		waitDialog("正在获取信息...");
@@ -398,7 +424,7 @@ public class MainActivity extends Activity
 				ma = tb.getMax();
 			} catch (mException e) {
 				ma = null;
-				showWarning("", e.getMessage(), e.getMore());
+				showWarning("", e.getMessage(), e.getMore(), false);
 			} 
 			if (ma != null) {
 				pagemax = ma.get(0);
@@ -415,15 +441,7 @@ public class MainActivity extends Activity
 		te += floormax;
 		te += "层";
 		midtext.setText(te);
-		continueForWait();
-	}
-	public void setPageMax(int num)
-	{
-		pagemax = num;
-	}
-	public void setFloorMax(int num)
-	{
-		floormax = num;
+		killWait();
 	}
 	private void setJumpDialogEdit_TextColor(EditText edit, TextView text, int colorid)
 	{
@@ -443,7 +461,7 @@ public class MainActivity extends Activity
 			});
 		tips.show();
 	}
-	private void showWarning(String title, String message, final String more)
+	private void showWarning(String title, String message, final String more, boolean cancelable)
 	{
 		AlertDialog.Builder warn = new AlertDialog.Builder(MainActivity.this);
 		if (title == "" || title == null) {
@@ -451,7 +469,7 @@ public class MainActivity extends Activity
 		}
 		warn.setTitle(title);
 		warn.setMessage(message);
-		warn.setCancelable(false);
+		warn.setCancelable(cancelable);
 		warn.setIcon(R.drawable.warning);
 		warn.setNegativeButton("复制错误信息到剪贴板", new DialogInterface.OnClickListener(){
 				@Override
@@ -465,8 +483,7 @@ public class MainActivity extends Activity
 	public void waitDialog(String message)
 	{
 		if (pd != null) {
-			pd.dismiss();
-			pd = null;
+			pd.setMessage(message);
 		}
 		//等待框，下面是对应的关闭函数
 		if (pd == null) {
@@ -478,7 +495,7 @@ public class MainActivity extends Activity
 			pd.show();
 		}
 	}
-	private void continueForWait()
+	private void killWait()
 	{
 		if (pd != null) {
 			pd.dismiss();
