@@ -15,7 +15,25 @@ public class Tools
 {
 	public static void loadHtmlInWebview(WebView webview, String Html)
 	{
-		webview.loadData(Html, "text/html", "UTF-8");
+		String thing = "<html><header>" + getCSS() + "</header><body>" + Html + "</body></html>";
+		webview.loadData(thing, "text/html", "UTF-8");
+	}
+
+	//自适应CSS
+	private static String getCSS()
+	{
+		return "<style type=\"text/css\"> img {" +
+			"width:100%;" +//限定图片宽度填充屏幕
+			"height:auto;" +//限定图片高度自动
+			"}" +
+			"body {" +
+			"margin-right:15px;" +//限定网页中的文字右边距为15px(可根据实际需要进行行管屏幕适配操作)
+			"margin-left:15px;" +//限定网页中的文字左边距为15px(可根据实际需要进行行管屏幕适配操作)
+			"margin-top:15px;" +//限定网页中的文字上边距为15px(可根据实际需要进行行管屏幕适配操作)
+			"font-size:40px;" +//限定网页中文字的大小为40px,请务必根据各种屏幕分辨率进行适配更改
+			"word-wrap:break-word;" +//允许自动换行(汉字网页应该不需要这一属性,这个用来强制英文单词换行,类似于word/wps中的西文换行)
+			"}" +
+			"</style>";
 	}
 
 	public static void copyToClipBoard(ClipboardManager cm, String text)
@@ -107,7 +125,7 @@ public class Tools
 		}
 		return list;
 	}
-	
+
 	//产生一个新的随机数，传参随意位数
 	public String newNumber(int num)
 	{
@@ -149,26 +167,32 @@ public class Tools
 		private int floornow = 1;
 		private int indexInList = 0;
 
-		ArrayMap<Integer, ArrayList<HashMap<String, String>>> floor = new ArrayMap<Integer, ArrayList<HashMap<String, String>>>();
-		ArrayMap<String, ArrayMap<String, String>> lzl = new ArrayMap<String, ArrayMap<String, String>>();
+		//对楼层，楼中楼，user建档
+		private ArrayMap<Integer, ArrayList<ArrayMap<String, String>>> flr = new ArrayMap<Integer, ArrayList<ArrayMap<String, String>>>();
+		private ArrayMap<String, ArrayList<ArrayMap<String, String>>> lzl = new ArrayMap<String, ArrayList<ArrayMap<String, String>>>();
+		private ArrayMap<String, ArrayMap<String, String>> ps = new ArrayMap<String, ArrayMap<String, String>>();
 
-		HashMap<String, String> mfloor = new HashMap<String, String>();
-		HashMap<String, String> mlzl = new HashMap<String, String>();
+		ArrayMap<String, String> mflr = new ArrayMap<String, String>();
+		ArrayMap<String, String> mlzl = new ArrayMap<String, String>();
+		ArrayMap<String, String> mps = new ArrayMap<String, String>();
 
 		HttpService httpService = new HttpService();
 
 		public TB()
 		{
 			//初始化楼层
-			mfloor.put("pid", "");
-			mfloor.put("id", "");
-			mfloor.put("nicheng", "");
-			mfloor.put("level", "");
-			mfloor.put("content", "");
-			mfloor.put("floor", "");
-			mfloor.put("time", "");
+			mflr.put("tid", "");//4592800021
+			mflr.put("pid", "");
+			mflr.put("id", "");
+			mflr.put("nicheng", "");
+			mflr.put("level", "");
+			mflr.put("content", "");
+			mflr.put("floor", "");
+			mflr.put("time", "");
+			mflr.put("lzlnum", "");
 
 			//初始化楼中楼
+			mlzl.put("tid", "");//4592800021
 			mlzl.put("pid", "");
 			mlzl.put("spid", "");
 			mlzl.put("id", "");
@@ -176,6 +200,11 @@ public class Tools
 			mlzl.put("level", "");
 			mlzl.put("content", "");
 			mlzl.put("time", "");
+			
+			mps.put("id", "");
+			mps.put("nicheng", "");
+			mps.put("level", "");
+			mps.put("aid", "");
 		}
 
 		private String getStamp()
@@ -243,9 +272,9 @@ public class Tools
 		}
 
 		/*-------------------------内部处理--------------------------*/
-		private ArrayList<String> 获取主题列表(String cookie, String tiebaname, int pn) throws mException
+		//等待维护
+		private JSONArray 获取主题列表(String cookie, String tiebaname, int pn) throws mException
         {
-			ArrayList<String> list = new ArrayList<String>();
             String 贴吧名 = tiebaname;
             String 贴吧名_URL_UTF8 = UrlEncodeUtf_8(tiebaname);
 
@@ -256,9 +285,18 @@ public class Tools
             data += 贴吧名_URL_UTF8;
             data += "&pn=" + pn;
             data += "&rn=50";
-
+			data += "&sort_type=1";
 			data += "&sign=" + sign(data);
-			return list;
+
+			String thing = httpService.post(url, data);
+			JSONObject list;
+			try {
+				list = new JSONObject(thing);
+			} catch (JSONException e) {
+				throw new mException("JSON解析好像遇到问题了", "主题列表JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
+			}
+			//return list.optJSONArray("thread_list");
+			return null;
 		}
 		private JSONArray getPage(String cookie, String tid, int pn, Boolean daoxu) throws mException
 		{
@@ -267,12 +305,9 @@ public class Tools
 			data += "&_client_id=" + getStamp();
 			data += "&_client_type=2&_client_version=8.8.8.3";
 			data += "&kz=" + tid;
-			if (daoxu == true/* && pn == mpn*/) {
+			if (daoxu == true) {
 				data += "&last=1&r=1";
-			}/* else if (daoxu == true) {
-				data += "&pn=" + pn;
-				data += "&r=1";
-			}*/ else {
+			} else {
 				data += "&pn=" + pn;
 			}
 			data += "&sign=" + sign(data);
@@ -283,12 +318,15 @@ public class Tools
 			try {
 				page = new JSONObject(thing);
 			} catch (JSONException e) {
-				throw new mException("JSON解析好像遇到问题了", "JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
+				throw new mException("JSON解析好像遇到问题了", "获取帖子JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
 			}
-			pagemax = page.optJSONObject("page").optInt("total_page", pagemax);
+			pagemax = Integer.valueOf(page.optJSONObject("page").optString("total_page", String.valueOf(pagemax)));
+			if (anaPerson(page.optJSONArray("user_list")) == false){
+				throw new mException("解析page的user_list错误");
+			}
 			return page.optJSONArray("post_list");
 		}
-		private JSONObject getFloor(String cookie, String tid, String pid, int pn) throws mException
+		public JSONArray getFloor(String cookie, String tid, String pid, int pn) throws mException
         {
             String url = "http://c.tieba.baidu.com/c/f/pb/floor";
             String data = cookie;
@@ -304,29 +342,54 @@ public class Tools
 			JSONObject floor;
 			try {
 				floor = new JSONObject(thing);
+				return floor.optJSONArray("subpost_list");
 			} catch (JSONException e) {
-				throw new mException("JSON解析好像遇到问题了", "JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
+				throw new mException("JSON解析好像遇到问题了", "获取楼中楼JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
 			}
-			return floor.optJSONObject("subpost_list");
+
 		}
-		private void anaPage(JSONArray list, int page)
+		private boolean anaPerson(JSONArray list){
+			int len = list.length();
+			if (len < 1) {
+				return false;
+			}
+			ArrayMap<String, ArrayMap<String, String>> pslist = new ArrayMap<String, ArrayMap<String, String>>();
+			JSONObject eps;
+			for (int i = 0;i < len; i++) {
+				eps = list.optJSONObject(i);
+				mps.put("aid", eps.optString("id"));
+				mps.put("id", eps.optString("name", "[未获取到用户ID]"));
+				mps.put("nicheng", eps.optString("name_show", "[未获取到用户昵称]"));
+			}
+			if(pslist.size() == list.length()){
+				ps.putAll(pslist);
+				return true;
+			}else{
+				return false;
+			}
+		}
+		private void anaPage(JSONArray list, String tid, int page)
 		{
 			int len = list.length();
 			if (len < 1) {
 				return ;
 			}
-			ArrayList<HashMap<String, String>> floorlist = new ArrayList<HashMap<String, String>>();
+			ArrayList<ArrayMap<String, String>> floorlist = new ArrayList<ArrayMap<String, String>>();
 			JSONObject fl;
 			for (int i = 0;i < len; i++) {
 				fl = list.optJSONObject(i);
+				mflr.put("tid", tid);
+				mflr.put("pid", fl.optString("id"));
 				
+				floorlist.add(mflr);
 			}
+			flr.put(page, floorlist);
 		}
 		private void anaFloor(JSONArray list)
 		{
 
 		}
-		private String anaContent(JSONArray content)
+		private String anaContent(JSONArray content) throws mException
 		{
 			int len = content.length();
 			if (len < 1) {
@@ -338,60 +401,61 @@ public class Tools
 			}
 			return null;
 		}
-		private String anaContentToHtml(JSONObject content)
+		private String anaContentToHtml(JSONObject content) throws mException
 		{
 			String type = content.optString("type", "0");
 			String thing = "";
-			if (type == "0") {
-				//thing += (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
-				thing += content.optString("text", "");
-			} else if (type == "1") {
-				//{"type":1,"link":"网址","text":"网址"}
-				//thing += "#链接=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"] + "#";
-				thing += "<a href=\"" + content.optString("link", "") + "\">" + content.optString("text", "") + "<\\a>";
-				//控制台_输出(0, "#链接# " + (String)内容源码["post_list"][内容计数]["content"][文本计数]["link"]);
-			} else if (type == "2") {
-				thing += "#表情=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["c"] + "#";
-			} else if (type == "3") {
-				//{"type":3,"src":"链接","bsize":"189,199","size":"49634"}
-				//Console.WriteLine((String)内容源码["post_list"][内容计数]["content"].ToString());
-				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
-				thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
-			} else if (type == "4") {
-				thing += "#艾特=" + 内容源码["post_list"][内容计数]["content"][文本计数]["text"].ToString().Replace("@", "") + "#";
-			} else if (type == "5") {
-				//{"type":5,"e_type":15,"width":"480","height":"480","bsize":"480,480","during_time":"2","origin_size":"168046","text":"http:\/\/tieba.baidu.com\/mo\/q\/movideo\/page?thumbnail=d109b3de9c82d158d3fcee1d880a19d8bc3e421b&video=10363_ed294eae88371575b3dbcf9f1990f68d","link":"http:\/\/tb-video.bdstatic.com\/tieba-smallvideo\/10363_ed294eae88371575b3dbcf9f1990f68d.mp4","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/d109b3de9c82d158d3fcee1d880a19d8bc3e421b.jpg","is_native_app":0,"native_app":[]}
-				//thing += "#视频#";
-			} else if (type == "7") {
-				//{"type":"7","text":"\n"}
-				thing += "<br>";
-			} else if (type == "9") {
-				//{"type":"9","text":"6666666","phonetype":"2"}
-				//thing += (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
-				thing += content.optString("text", "");
-			} else if (type == "10") {
-				//{"type":"10","during_time":"15000","voice_md5":"e25ef2db5076f825e229c6cdb1613f38_1064475243"}
-				//thing += "#语音=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["voice_md5"] + "," + (String)内容源码["post_list"][内容计数]["content"][文本计数]["during_time"] + "#";
-			} else if (type == "11") {
-				//{"type":"11","c":"白发魔女传之明月天国_女屌丝","static":"png静态图链接","dynamic":"gif动态图链接","height":"160","width":"160","icon":"http://tb2.bdstatic.com/tb/editor/images/faceshop/1058_baifa/panel.png","packet_name":"白发魔女传之明月天国"}
-				//thing += "#表情=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["c"] + "#";
-			} else if (type == "16") {
-				//{"type":"16","bsize":"560,560","graffiti_info":{"url":"jpg网页端原图","gid":"123456"},"cdn_src":"客户端缩略图","big_cdn_src":"客户端大图"}
-				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+			/*if (type == "0") {
+			 //thing += (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
+			 thing += content.optString("text", "");
+			 } else if (type == "1") {
+			 //{"type":1,"link":"网址","text":"网址"}
+			 //thing += "#链接=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"] + "#";
+			 thing += "<a href=\"" + content.optString("link", "") + "\">" + content.optString("text", "") + "<\\a>";
+			 //控制台_输出(0, "#链接# " + (String)内容源码["post_list"][内容计数]["content"][文本计数]["link"]);
+			 } else if (type == "2") {
+			 thing += "#表情=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["c"] + "#";
+			 } else if (type == "3") {
+			 //{"type":3,"src":"链接","bsize":"189,199","size":"49634"}
+			 //Console.WriteLine((String)内容源码["post_list"][内容计数]["content"].ToString());
+			 //thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+			 thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+			 } else if (type == "4") {
+			 //thing += "#艾特=" + 内容源码["post_list"][内容计数]["content"][文本计数]["text"].ToString().Replace("@", "") + "#";
+			 thing += "<a href=\"http://tieba.baidu.com/home/main/?un=" + UrlEncodeUtf_8(content.optString("text", "").replace("@", "")) + "\">" + content.optString("text", "") + "<\\a>";
+			 } else if (type == "5") {
+			 //{"type":5,"e_type":15,"width":"480","height":"480","bsize":"480,480","during_time":"2","origin_size":"168046","text":"http:\/\/tieba.baidu.com\/mo\/q\/movideo\/page?thumbnail=d109b3de9c82d158d3fcee1d880a19d8bc3e421b&video=10363_ed294eae88371575b3dbcf9f1990f68d","link":"http:\/\/tb-video.bdstatic.com\/tieba-smallvideo\/10363_ed294eae88371575b3dbcf9f1990f68d.mp4","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/d109b3de9c82d158d3fcee1d880a19d8bc3e421b.jpg","is_native_app":0,"native_app":[]}
+			 //thing += "#视频#";
+			 } else if (type == "7") {
+			 //{"type":"7","text":"\n"}
+			 thing += "<br>";
+			 } else if (type == "9") {
+			 //{"type":"9","text":"6666666","phonetype":"2"}
+			 //thing += (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
+			 thing += content.optString("text", "");
+			 } else if (type == "10") {
+			 //{"type":"10","during_time":"15000","voice_md5":"e25ef2db5076f825e229c6cdb1613f38_1064475243"}
+			 //thing += "#语音=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["voice_md5"] + "," + (String)内容源码["post_list"][内容计数]["content"][文本计数]["during_time"] + "#";
+			 } else if (type == "11") {
+			 //{"type":"11","c":"白发魔女传之明月天国_女屌丝","static":"png静态图链接","dynamic":"gif动态图链接","height":"160","width":"160","icon":"http://tb2.bdstatic.com/tb/editor/images/faceshop/1058_baifa/panel.png","packet_name":"白发魔女传之明月天国"}
+			 //thing += "#表情=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["c"] + "#";
+			 } else if (type == "16") {
+			 //{"type":"16","bsize":"560,560","graffiti_info":{"url":"jpg网页端原图","gid":"123456"},"cdn_src":"客户端缩略图","big_cdn_src":"客户端大图"}
+			 //thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 
-				thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
-			} else if (type == "17") {
-				//{"type":"17","high_together":{"album_id":"478448408116821906","album_name":"关于众筹西游记歌曲演唱会活动","start_time":"0","end_time":"0","location":"","num_join":"0","pic_urls":[]}}
-				//thing += "#活动=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["album_name"] + "#";
-			} else if (type == "18") {
-				//{"type":"18","text":"#白狐狸不改国庆礼包就滚出dnf#","link":"http://tieba.baidu.com/mo/q/hotMessage?topic_id=0&topic_name=白狐狸不改国庆礼包就滚出dnf"}
-				//thing += "#热议=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"] + "#";
-			} else if (type == "20") {
-				//{"type":"20","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","bsize":"375,348","meme_info":{"pck_id":"0","pic_id":"47098639564","width":"375","height":"348","pic_url":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","thumbnail":"http:\/\/imgsrc.baidu.com\/forum\/abpic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","detail_link":"http:\/\/tieba.baidu.com\/n\/interact\/emoticon\/0\/47098639564?frompb=1"}}
+			 thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+			 } else if (type == "17") {
+			 //{"type":"17","high_together":{"album_id":"478448408116821906","album_name":"关于众筹西游记歌曲演唱会活动","start_time":"0","end_time":"0","location":"","num_join":"0","pic_urls":[]}}
+			 //thing += "#活动=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["album_name"] + "#";
+			 } else if (type == "18") {
+			 //{"type":"18","text":"#白狐狸不改国庆礼包就滚出dnf#","link":"http://tieba.baidu.com/mo/q/hotMessage?topic_id=0&topic_name=白狐狸不改国庆礼包就滚出dnf"}
+			 //thing += "#热议=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"] + "#";
+			 } else if (type == "20") {
+			 //{"type":"20","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","bsize":"375,348","meme_info":{"pck_id":"0","pic_id":"47098639564","width":"375","height":"348","pic_url":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","thumbnail":"http:\/\/imgsrc.baidu.com\/forum\/abpic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","detail_link":"http:\/\/tieba.baidu.com\/n\/interact\/emoticon\/0\/47098639564?frompb=1"}}
 
-				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["src"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["src"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
-				thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["src"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
-			}
+			 //thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["src"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["src"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+			 thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["src"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
+			 }*/
 			return thing;
 		}
 	}

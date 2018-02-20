@@ -4,6 +4,7 @@ import android.app.*;
 import android.content.*;
 import android.graphics.drawable.*;
 import android.os.*;
+import android.util.*;
 import android.view.*;
 import android.view.View.*;
 import android.view.inputmethod.*;
@@ -62,8 +63,8 @@ public class MainActivity extends Activity
 
 	private int hasCopy = 0;
 
-	private HashMap<String, HashMap<String, String>> tj = new HashMap<String, HashMap<String, String>>();
-	private HashMap<String, String> ntj = new HashMap<String, String>();
+	private ArrayMap<String, ArrayMap<String, String>> tj = new ArrayMap<String, ArrayMap<String, String>>();
+	private ArrayMap<String, String> ntj = new ArrayMap<String, String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -182,13 +183,19 @@ public class MainActivity extends Activity
 					setJumpDialogEdit_TextColor(jumpflooredit, jumpfloortext, R.color.mdblack_f);
 
 					String aa="中石化";
-					/*try {
+					try {
 						//aa = tb.get帖子("", "4592800021", pagemax, pagemax, true).get(0);
-						//aa = tb.getfloor("", "4592800021", "91112608095", 1).get(0);
+						aa = tb.getFloor("", "4592800021", "91112608095", 1).toString();
+						//aa = tb.获取主题列表("", "minecraftpe", 1).toString();
 					} catch (mException e) {
 						showWarning("", e.getMessage(), e.getMore());
-					}*/
+					}
 					//aa = tj.get("102").get("yx");
+					ArrayMap<String, String> aaa = new ArrayMap<String, String>();
+					aaa.put("仙山", "仙山快女装");
+					aa = aaa.put("仙山", "仙山援交吧");
+
+					//aa = aaa.get("仙山");
 
 					Toast.makeText(MainActivity.this, "get√", 0).show();
 					tool.copyToClipBoard(cm, aa);
@@ -273,6 +280,15 @@ public class MainActivity extends Activity
 		//获取WebView
 		web = (WebView)findViewById(R.id.mainWebView);
 
+		// 设置可以支持缩放 
+		//web.getSettings().setSupportZoom(true);
+
+		web.getSettings().setUseWideViewPort(true);
+
+		//自适应屏幕
+		web.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
+		web.getSettings().setLoadWithOverviewMode(true);//适应屏幕
+
 		//获取ScrollView
 		list = (LinearLayout)findViewById(R.id.mainLinearLayout);
 		/*try
@@ -292,24 +308,31 @@ public class MainActivity extends Activity
 	private Boolean updatePerson(int did, String id, String nicheng)
 	{
 		hasCopy = 0;
+		int old;
 		switch (did) {
 			case 1/*有效*/:
 				if (tj.containsKey(id)) {
-					int old = Integer.valueOf(tj.get(id).get("yx"));
-					if (tj.get(id).replace("yx", String.valueOf(old), String.valueOf(old + 1))) {
-						return true;
+					if (tj.containsKey(id) == true) {
+						old = Integer.valueOf(tj.get(id).get("yx"));
+						old ++;
+						if (old == Integer.valueOf(tj.get(id).put("yx", String.valueOf(old)))) {
+							return true;
+						}
 					}
 				} else {
 					tj.put(id, ntj);
-					tj.get(id).replace("nicheng", "", nicheng);
+					if (nicheng == tj.get(id).put("nicheng", nicheng)) {
+						return true;
+					}
 				}
 				break;
 			case 2/*高质量*/:
 				if (tj.containsKey(id)) {
 					return false;
 				} else {
-					int old = Integer.valueOf(tj.get(id).get("gzl"));
-					if (tj.get(id).replace("gzl", String.valueOf(old), String.valueOf(old + 1))) {
+					old = Integer.valueOf(tj.get(id).get("gzl"));
+					old ++;
+					if (old == Integer.valueOf(tj.get(id).put("gzl", String.valueOf(old)))) {
 						return true;
 					}
 				}
@@ -318,13 +341,17 @@ public class MainActivity extends Activity
 				if (tj.containsKey(id)) {
 					return false;
 				} else {
-					int old = Integer.valueOf(tj.get(id).get("yx"));
+					old = Integer.valueOf(tj.get(id).get("yx"));
 					int oldg = Integer.valueOf(tj.get(id).get("gzl"));
 					if (old == 1) {
 						tj.remove(id);
 					} else {
-						tj.get(id).replace("yx", String.valueOf(old), String.valueOf(old - 1));
-						tj.get(id).replace("gzl", String.valueOf(oldg), String.valueOf(oldg - 1));
+						old --;
+						oldg --;
+						if (old == Integer.valueOf(tj.get(id).put("yx", String.valueOf(old))) && 
+							oldg == Integer.valueOf(tj.get(id).put("gzl", String.valueOf(oldg)))){
+								return true;
+						}
 					}
 				}
 				break;
@@ -332,7 +359,7 @@ public class MainActivity extends Activity
 		return false;
 	}
 	//更新名单
-	public Boolean updatePersonList(ArrayList<HashMap<String, String>> personlist)
+	public Boolean updatePersonList(ArrayList<ArrayMap<String, String>> personlist)
 	{
 		//清空内容
 		if (list.getChildCount() != 0) {
