@@ -31,7 +31,7 @@ public class Tools
 			"margin-right:15px;" +//限定网页中的文字右边距为15px(可根据实际需要进行行管屏幕适配操作)
 			"margin-left:15px;" +//限定网页中的文字左边距为15px(可根据实际需要进行行管屏幕适配操作)
 			"margin-top:15px;" +//限定网页中的文字上边距为15px(可根据实际需要进行行管屏幕适配操作)
-			"font-size:40px;" +//限定网页中文字的大小为40px,请务必根据各种屏幕分辨率进行适配更改
+			"font-size:50px;" +//限定网页中文字的大小为40px,请务必根据各种屏幕分辨率进行适配更改
 			"word-wrap:break-word;" +//允许自动换行(汉字网页应该不需要这一属性,这个用来强制英文单词换行,类似于word/wps中的西文换行)
 			"}" +
 			"</style>";
@@ -159,10 +159,9 @@ public class Tools
     }
 
 	//字符串转时间戳
-    public static String strTimeToUnix(String time)
+    /*public static String strTimeToUnix(String time)
 	{
         String timeStamp = null;
-
 		//日期格式，yyyy-MM-dd HH:mm:ss
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date d;
@@ -174,17 +173,19 @@ public class Tools
             e.printStackTrace();
         }
         return timeStamp;
-    }
+    }*/
 
-    //时间戳转字符串
-    public static String unixToStrTime(String timeStamp)
+	// 将时间戳转为字符串
+	public static String unixToStrTime(String cc_time)
 	{
-        String timeString = null;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        long  l = Long.valueOf(timeStamp);
-        timeString = sdf.format(new Date(l));//单位秒
-        return timeString;
-    }
+		String re_StrTime = null;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		// 例如：cc_time=1291778220
+		long lcc_time = Long.valueOf(cc_time);
+		re_StrTime = sdf.format(new Date(lcc_time * 1000L));
+		return re_StrTime;
+	}
+	
 	public class TB
 	{
 		private int pagemax = 1;
@@ -345,13 +346,13 @@ public class Tools
 			} else {
 				if (floor > floornow) {
 					ArrayList<String> f = getNextFloor();
-					while(Integer.valueOf(f.get(2)) < floor){
+					while (Integer.valueOf(f.get(2)) < floor) {
 						f = getNextFloor();
 					}
 					return f;
 				} else if (floor < floornow) {
 					ArrayList<String> f = getLastFloor();
-					while(Integer.valueOf(f.get(2)) > floor){
+					while (Integer.valueOf(f.get(2)) > floor) {
 						f = getLastFloor();
 					}
 					return f;
@@ -365,7 +366,7 @@ public class Tools
 			indexInList = 0;
 			getPage("", tid, page, false);
 			if (flr.containsKey(pagenow) == true) {
-				return getReturn(flr.get(pagenow).get(0));
+				return getReturn(flr.get(pagenow).get(28));
 			} else {
 				throw new mException("楼层不存在", "jumppage时楼层不存在, page=" + page);
 			}
@@ -374,16 +375,16 @@ public class Tools
 		/*-------------------------内部处理--------------------------*/
 		//等待维护
 		private JSONArray gettz(String cookie, String tiebaname, int pn, int sorttype) throws mException
-        {
-            String 贴吧名_URL_UTF8 = UrlEncodeUtf_8(tiebaname);
+		{
+			String 贴吧名_URL_UTF8 = UrlEncodeUtf_8(tiebaname);
 
-            String url = "http://c.tieba.baidu.com/c/f/frs/page";
-            String data = cookie;
+			String url = "http://c.tieba.baidu.com/c/f/frs/page";
+			String data = cookie;
 			data += "&_client_id=" + getStamp();
-            data += "&_client_type=2&_client_version=7.8.1&kw=";
-            data += 贴吧名_URL_UTF8;
-            data += "&pn=" + pn;
-            data += "&rn=50";
+			data += "&_client_type=2&_client_version=7.8.1&kw=";
+			data += 贴吧名_URL_UTF8;
+			data += "&pn=" + pn;
+			data += "&rn=50";
 			data += "&sort_type=" + sorttype;
 			data += "&sign=" + sign(data);
 
@@ -426,19 +427,19 @@ public class Tools
 			if (anaPerson(page.optJSONArray("user_list")) == false) {
 				throw new mException("解析page的user_list错误");
 			}
-			anaPage(page.optJSONArray("post_list"), tid, pn);
+			anaPage(page.optJSONArray("post_list"), tid, pagenow);
 		}
 
 		//自带遍历
 		private void getlzl(String cookie, String tid, String pid, int pn) throws mException
-        {
-            String url = "http://c.tieba.baidu.com/c/f/pb/floor";
-            String data = cookie;
-            data += "&_client_id=" + getStamp();
-        	data += "&_client_type=2&_client_version=8.7.8.6";
-        	data += "&kz=" + tid;
-            data += "&pid=" + pid;
-            data += "&pn=" + pn;
+		{
+			String url = "http://c.tieba.baidu.com/c/f/pb/floor";
+			String data = cookie;
+			data += "&_client_id=" + getStamp();
+			data += "&_client_type=2&_client_version=8.7.8.6";
+			data += "&kz=" + tid;
+			data += "&pid=" + pid;
+			data += "&pn=" + pn;
 			data += "&sign=" + sign(data);
 
 			String thing = httpService.post(url, data);

@@ -129,7 +129,7 @@ public class MainActivity extends Activity
 					try {
 						ana(tb.getLastFloor());
 					} catch (mException e) {
-						
+
 					}
 				}
 			});
@@ -143,7 +143,7 @@ public class MainActivity extends Activity
 					try {
 						ana(tb.getNextFloor());
 					} catch (mException e) {
-						
+
 					}
 				}
 			});
@@ -250,9 +250,9 @@ public class MainActivity extends Activity
 									try {
 										ana(tb.jumpFloor(Integer.valueOf(jumpflooredit.getText().toString())));
 									} catch (mException e) {
-										
+
 									} catch (NumberFormatException e) {
-										
+
 									}
 								}
 							}
@@ -362,7 +362,7 @@ public class MainActivity extends Activity
 		}
 		return false;
 	}
-	
+
 	//更新名单
 	public Boolean updatePersonList(ArrayList<String> personlist)
 	{
@@ -372,18 +372,17 @@ public class MainActivity extends Activity
 		}
 
 		int ma = personlist.size();
-		for (int i = 0; i < ma; i++) {
+		for (int i = 0; i < ma; i += 2) {
 			person = View.inflate(MainActivity.this, R.layout.person, null);
 
 			//设置id, 昵称
 			((TextView)person.findViewById(R.id.personid)).setText(personlist.get(i));
-			i++;
-			((TextView)person.findViewById(R.id.personNiCheng)).setText(personlist.get(i));
+			((TextView)person.findViewById(R.id.personNiCheng)).setText(personlist.get(i + 1));
 
 			//设置按钮监听
 			person.findViewById(R.id.personbutton).setBackground(none);
 			person.findViewById(R.id.personbutton).setOnClickListener(personb);
-			
+
 			list.addView(person, personlp);
 		}
 
@@ -398,19 +397,21 @@ public class MainActivity extends Activity
 	}
 	private void ana(ArrayList<String> list) throws mException
 	{
-		if(list.size() < 5){
+		if (list.size() < 5) {
 			throw new mException("传值过少", "ana错误, ana.size=" + list.size());
 		}
 		pagenow = Integer.valueOf(list.get(0));
 		pagemax = Integer.valueOf(list.get(1));
 		floornow = Integer.valueOf(list.get(2));
 		floormax = Integer.valueOf(list.get(3));
-		
+
+		midtext.setText(pagenow + "/" + pagemax + "页 " + floornow + "/" + floormax + "楼");
+
 		tool.loadHtmlInWebview(web, list.get(4));
-		
+
 		int len = list.size();
 		ArrayList<String> pr = new ArrayList<String>();
-		for(int i = 5; i < len; i++){
+		for (int i = 5; i < len; i++) {
 			pr.add(list.get(i));
 		}
 		updatePersonList(pr);
@@ -439,7 +440,7 @@ public class MainActivity extends Activity
 		te += floornow;
 		te += "/";
 		te += floormax;
-		te += "层";
+		te += "楼";
 		midtext.setText(te);
 		killWait();
 	}

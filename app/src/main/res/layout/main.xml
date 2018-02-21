@@ -9,21 +9,34 @@
 	android:paddingRight="10dp"
 	android:paddingTop="10dp">
 
-	<WebView
-		android:layout_height="wrap_content"
-		android:layout_width="match_parent"
-		android:id="@+id/mainWebView"/>
-
 	<ScrollView
-		android:layout_height="wrap_content"
-		android:layout_width="match_parent"
-		android:id="@+id/mainScrollView">
+		android:layout_height="match_parent"
+		android:layout_width="match_parent">
 
 		<LinearLayout
 			android:layout_height="match_parent"
 			android:layout_width="match_parent"
-			android:orientation="vertical"
-			android:id="@+id/mainLinearLayout"/>
+			android:orientation="vertical">
+
+			<WebView
+				android:layout_height="wrap_content"
+				android:layout_width="match_parent"
+				android:id="@+id/mainWebView"/>
+
+			<ScrollView
+				android:layout_height="wrap_content"
+				android:layout_width="match_parent"
+				android:id="@+id/mainScrollView">
+
+				<LinearLayout
+					android:layout_height="match_parent"
+					android:layout_width="match_parent"
+					android:orientation="vertical"
+					android:id="@+id/mainLinearLayout"/>
+
+			</ScrollView>
+
+		</LinearLayout>
 
 	</ScrollView>
 
