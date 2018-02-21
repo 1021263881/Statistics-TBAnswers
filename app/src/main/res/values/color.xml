@@ -2,4 +2,5 @@
 <resources>
 	<color name="mdblack">#89000000</color>
 	<color name="mdblack_f">#42000000</color>
+	<color name="white">#ffffffff</color>
 </resources>

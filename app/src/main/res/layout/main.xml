@@ -24,9 +24,12 @@
 				android:id="@+id/mainWebView"/>
 
 			<ScrollView
-				android:layout_height="wrap_content"
+				android:layout_height="match_parent"
 				android:layout_width="match_parent"
-				android:id="@+id/mainScrollView">
+				android:id="@+id/mainScrollView"
+				android:paddingLeft="15dp"
+				android:paddingRight="15dp"
+				android:paddingTop="10dp">
 
 				<LinearLayout
 					android:layout_height="match_parent"

@@ -9,9 +9,9 @@
 	<TextView
 		android:layout_height="match_parent"
 		android:layout_width="wrap_content"
-		android:textSize="24sp"
+		android:textSize="16sp"
 		android:gravity="left|center"
-		android:ems="5"
+		android:ems="7"
 		android:id="@+id/personid"
 		android:paddingLeft="15dp"/>
 
@@ -19,8 +19,8 @@
 		android:layout_height="match_parent"
 		android:layout_width="wrap_content"
 		android:gravity="left|center"
-		android:ems="5"
-		android:textSize="20sp"
+		android:ems="7"
+		android:textSize="14sp"
 		android:id="@+id/personNiCheng"
 		android:paddingLeft="10dp"/>
 

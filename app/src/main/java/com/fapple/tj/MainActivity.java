@@ -21,7 +21,7 @@ import android.view.View.OnLongClickListener;
 public class MainActivity extends Activity 
 {
 	private Tools tool = new Tools();
-	private Tools.HttpService httpservice = tool.new HttpService();
+	//private Tools.HttpService httpservice = tool.new HttpService();
 	private Tools.TB tb = tool.new TB("4592800021");
 	private ClipboardManager cm = null;
 	private ProgressDialog pd = null;
@@ -150,7 +150,7 @@ public class MainActivity extends Activity
 
 		//设置midtext单击事件
 		midtext = (TextView)actionbarview.findViewById(R.id.actionbarmidtext);
-		midtext.setTextColor(getResources().getColor(R.color.mdblack));
+		midtext.setTextColor(getResources().getColor(R.color.white));
 		midtext.setOnClickListener(new OnClickListener(){
 				@Override
 				public void onClick(View p1)
@@ -190,6 +190,7 @@ public class MainActivity extends Activity
 									InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);//得到系统的输入方法服务
 									imm.showSoftInput(p1, 0);
 
+									jumppagebutton.setChecked(true);
 									setJumpDialogEdit_TextColor(jumppageedit, jumppagetext, R.color.mdblack);
 									jumpfloorbutton.setChecked(false);
 									setJumpDialogEdit_TextColor(jumpflooredit, jumpfloortext, R.color.mdblack_f);
@@ -205,6 +206,7 @@ public class MainActivity extends Activity
 									InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);//得到系统的输入方法服务
 									imm.showSoftInput(p1, 0);
 
+									jumpfloorbutton.setChecked(true);
 									setJumpDialogEdit_TextColor(jumpflooredit, jumpfloortext, R.color.mdblack);
 									jumppagebutton.setChecked(false);
 									setJumpDialogEdit_TextColor(jumppageedit, jumppagetext, R.color.mdblack_f);
@@ -236,9 +238,8 @@ public class MainActivity extends Activity
 							@Override
 							public void onClick(DialogInterface p1, int p2)
 							{
-								// TODO: Implement this method
 								if (jumppagebutton.isChecked() == true) {
-									Toast.makeText(MainActivity.this, "page", 0).show();
+									//Toast.makeText(MainActivity.this, "page", 0).show();
 									try {
 										ana(tb.jumpPage(Integer.valueOf(jumppageedit.getText().toString())));
 
@@ -246,7 +247,7 @@ public class MainActivity extends Activity
 
 									}
 								} else if (jumpfloorbutton.isChecked() == true) {
-									Toast.makeText(MainActivity.this, "floor", 0).show();
+									//Toast.makeText(MainActivity.this, "floor", 0).show();
 									try {
 										ana(tb.jumpFloor(Integer.valueOf(jumpflooredit.getText().toString())));
 									} catch (mException e) {
@@ -307,6 +308,11 @@ public class MainActivity extends Activity
 		//获取ScrollView
 		list = (LinearLayout)findViewById(R.id.mainLinearLayout);
 
+		try {
+			ana(tb.jumpFloor(1));
+		} catch (mException e) {
+			
+		}
 	}
 	//统计
 	private Boolean updatePerson(int did, String id, String nicheng)
@@ -324,7 +330,7 @@ public class MainActivity extends Activity
 						}
 					}
 				} else {
-					tj.put(id, ntj);
+					tj.put(id, new ArrayMap<String, String>(ntj));
 					if (nicheng == tj.get(id).put("nicheng", nicheng)) {
 						return true;
 					}
@@ -386,9 +392,6 @@ public class MainActivity extends Activity
 			list.addView(person, personlp);
 		}
 
-		person = View.inflate(MainActivity.this, R.layout.person, null);
-		person.findViewById(R.id.personbutton).setOnClickListener(personb);
-		list.addView(person, personlp);
 		if (list.getChildCount() == personlist.size()) {
 			return true;
 		} else {
@@ -411,15 +414,21 @@ public class MainActivity extends Activity
 
 		int len = list.size();
 		ArrayList<String> pr = new ArrayList<String>();
-		for (int i = 5; i < len; i++) {
-			pr.add(list.get(i));
+		String name = "";
+		for (int i = 5; i < len; i += 2) {
+			name = list.get(i);
+			if (pr.contains(name) == false) {
+				pr.add(name);
+				name = list.get(i + 1);
+				pr.add(name);
+			}
 		}
 		updatePersonList(pr);
 	}
 	public void freshmax()
 	{
 		waitDialog("正在获取信息...");
-		if (pagemax == 1 && floormax == 1) {
+		if (floormax == 1) {
 			ArrayList<Integer> ma;
 			try {
 				ma = tb.getMax();
@@ -428,7 +437,6 @@ public class MainActivity extends Activity
 				showWarning("", e.getMessage(), e.getMore(), false);
 			} 
 			if (ma != null) {
-				pagemax = ma.get(0);
 				floormax = ma.get(1);
 			}
 		}

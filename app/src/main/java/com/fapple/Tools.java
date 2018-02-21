@@ -31,7 +31,7 @@ public class Tools
 			"margin-right:15px;" +//限定网页中的文字右边距为15px(可根据实际需要进行行管屏幕适配操作)
 			"margin-left:15px;" +//限定网页中的文字左边距为15px(可根据实际需要进行行管屏幕适配操作)
 			"margin-top:15px;" +//限定网页中的文字上边距为15px(可根据实际需要进行行管屏幕适配操作)
-			"font-size:50px;" +//限定网页中文字的大小为40px,请务必根据各种屏幕分辨率进行适配更改
+			"font-size:42px;" +//限定网页中文字的大小为40px,请务必根据各种屏幕分辨率进行适配更改
 			"word-wrap:break-word;" +//允许自动换行(汉字网页应该不需要这一属性,这个用来强制英文单词换行,类似于word/wps中的西文换行)
 			"}" +
 			"</style>";
@@ -160,20 +160,20 @@ public class Tools
 
 	//字符串转时间戳
     /*public static String strTimeToUnix(String time)
-	{
-        String timeStamp = null;
-		//日期格式，yyyy-MM-dd HH:mm:ss
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date d;
-        try {
-            d = sdf.parse(time);
-            long l = d.getTime();
-            timeStamp = String.valueOf(l);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return timeStamp;
-    }*/
+	 {
+	 String timeStamp = null;
+	 //日期格式，yyyy-MM-dd HH:mm:ss
+	 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	 Date d;
+	 try {
+	 d = sdf.parse(time);
+	 long l = d.getTime();
+	 timeStamp = String.valueOf(l);
+	 } catch (ParseException e) {
+	 e.printStackTrace();
+	 }
+	 return timeStamp;
+	 }*/
 
 	// 将时间戳转为字符串
 	public static String unixToStrTime(String cc_time)
@@ -185,7 +185,7 @@ public class Tools
 		re_StrTime = sdf.format(new Date(lcc_time * 1000L));
 		return re_StrTime;
 	}
-	
+
 	public class TB
 	{
 		private int pagemax = 1;
@@ -201,9 +201,9 @@ public class Tools
 		private ArrayMap<String, ArrayList<ArrayMap<String, String>>> lzl = new ArrayMap<String, ArrayList<ArrayMap<String, String>>>();
 		private ArrayMap<String, ArrayMap<String, String>> ps = new ArrayMap<String, ArrayMap<String, String>>();
 
-		private ArrayMap<String, String> mflr = new ArrayMap<String, String>();
-		private ArrayMap<String, String> mlzl = new ArrayMap<String, String>();
-		private ArrayMap<String, String> mps = new ArrayMap<String, String>();
+		//private ArrayMap<String, String> mflr = new ArrayMap<String, String>();
+		//private ArrayMap<String, String> mlzl = new ArrayMap<String, String>();
+		//private ArrayMap<String, String> mps = new ArrayMap<String, String>();
 
 		HttpService httpService = new HttpService();
 
@@ -212,29 +212,29 @@ public class Tools
 			this.tid = tid;
 
 			//初始化楼层
-			mflr.put("tid", "");//4592800021
-			mflr.put("pid", "");
-			mflr.put("id", "");
-			mflr.put("nicheng", "");
-			mflr.put("level", "");
-			mflr.put("content", "");
-			mflr.put("floor", "");
-			mflr.put("time", "");
+			/*mflr.put("tid", "");//4592800021
+			 mflr.put("pid", "");
+			 mflr.put("id", "");
+			 mflr.put("nicheng", "");
+			 mflr.put("level", "");
+			 mflr.put("content", "");
+			 mflr.put("floor", "");
+			 mflr.put("time", "");
 
-			//初始化楼中楼
-			mlzl.put("tid", "");//4592800021
-			mlzl.put("pid", "");
-			mlzl.put("spid", "");
-			mlzl.put("id", "");
-			mlzl.put("nicheng", "");
-			mlzl.put("level", "");
-			mlzl.put("content", "");
-			mlzl.put("time", "");
+			 //初始化楼中楼
+			 mlzl.put("tid", "");//4592800021
+			 mlzl.put("pid", "");
+			 mlzl.put("spid", "");
+			 mlzl.put("id", "");
+			 mlzl.put("nicheng", "");
+			 mlzl.put("level", "");
+			 mlzl.put("content", "");
+			 mlzl.put("time", "");
 
-			mps.put("id", "");
-			mps.put("nicheng", "");
-			mps.put("level", "");
-			mps.put("aid", "");
+			 mps.put("id", "");
+			 mps.put("nicheng", "");
+			 mps.put("level", "");
+			 mps.put("aid", "");*/
 
 			try {
 				jumpPage(1);
@@ -366,7 +366,7 @@ public class Tools
 			indexInList = 0;
 			getPage("", tid, page, false);
 			if (flr.containsKey(pagenow) == true) {
-				return getReturn(flr.get(pagenow).get(28));
+				return getReturn(flr.get(pagenow).get(0));
 			} else {
 				throw new mException("楼层不存在", "jumppage时楼层不存在, page=" + page);
 			}
@@ -467,18 +467,22 @@ public class Tools
 			ArrayList<ArrayMap<String, String>> floorlist = new ArrayList<ArrayMap<String, String>>();
 			JSONObject fl;
 			ArrayMap<String, String> epg;
+			ArrayMap<String, String> nflr;
 			for (int i = 0;i < len; i++) {
 				fl = list.optJSONObject(i);
-				mflr.put("tid", tid);
-				mflr.put("pid", fl.optString("id"));
-				epg = ps.get(fl.optString("author_id"));
-				mflr.put("id", epg.get("id"));
-				mflr.put("nicheng", epg.get("nicheng"));
-				mflr.put("level", epg.get("level"));
-				mflr.put("content", anaContent(fl.optJSONArray("content")));
-				mflr.put("floor", fl.optString("floor"));
-				mflr.put("time", unixToStrTime(fl.optString("time")));
-				floorlist.add(mflr);
+				nflr = new ArrayMap<String, String>();
+				//nflr.putAll(mflr);
+				nflr.put("tid", tid);
+				nflr.put("pid", fl.optString("id", ""));
+				epg = ps.get(fl.optString("author_id", ""));
+				nflr.put("id", epg.get("id"));
+				nflr.put("nicheng", epg.get("nicheng"));
+				nflr.put("level", epg.get("level"));
+				nflr.put("content", anaContent(fl.optJSONArray("content")));
+				nflr.put("floor", fl.optString("floor", ""));
+				nflr.put("time", unixToStrTime(fl.optString("time", "")));
+
+				floorlist.add(nflr);
 			}
 			flr.put(page, floorlist);
 		}
@@ -490,19 +494,21 @@ public class Tools
 			}
 			ArrayList<ArrayMap<String, String>> lzllist = new ArrayList<ArrayMap<String, String>>();
 			JSONObject fl;
-			ArrayMap<String, String> epg = null;
+			ArrayMap<String, String> epg;
+			ArrayMap<String, String> nlzl;
 			for (int i = 0;i < len; i++) {
 				fl = list.optJSONObject(i);
-				mlzl.put("tid", tid);
-				mlzl.put("pid", pid);
-				mlzl.put("spid", fl.optString("id"));
+				nlzl = new ArrayMap<String, String>();
+				nlzl.put("tid", tid);
+				nlzl.put("pid", pid);
+				nlzl.put("spid", fl.optString("id"));
 				epg = anaPerson(fl.optJSONObject("author"));
-				mlzl.put("id", epg.get("id"));
-				mflr.put("nicheng", epg.get("nicheng"));
-				mflr.put("level", epg.get("level"));
-				mflr.put("content", anaContent(fl.optJSONArray("content")));
-				mflr.put("time", unixToStrTime(fl.optString("time")));
-				lzllist.add(mflr);
+				nlzl.put("id", epg.get("id"));
+				nlzl.put("nicheng", epg.get("nicheng"));
+				nlzl.put("level", epg.get("level"));
+				nlzl.put("content", anaContent(fl.optJSONArray("content")));
+				nlzl.put("time", unixToStrTime(fl.optString("time")));
+				lzllist.add(nlzl);
 			}
 			lzl.put(pid, lzllist);
 		}
@@ -514,13 +520,15 @@ public class Tools
 			}
 			ArrayMap<String, ArrayMap<String, String>> pslist = new ArrayMap<String, ArrayMap<String, String>>();
 			JSONObject eps;
+			ArrayMap<String, String> mps;
 			for (int i = 0;i < len; i++) {
 				eps = list.optJSONObject(i);
-				mps.put("aid", eps.optString("id"));
+				mps = new ArrayMap<String, String>();
+				mps.put("aid", eps.optString("id", ""));
 				mps.put("id", eps.optString("name", "[未获取到用户ID]"));
 				mps.put("nicheng", eps.optString("name_show", "[未获取到用户昵称]"));
 				mps.put("level", eps.optString("level_id", "[未获取到用户等级]"));
-				pslist.put(mps.get("aid"), mps);
+				pslist.put(mps.get("aid").toString(), new ArrayMap<String, String>(mps));
 			}
 			if (pslist.size() == list.length()) {
 				ps.putAll(pslist);
@@ -534,6 +542,7 @@ public class Tools
 			if (eps == null) {
 				return null;
 			}
+			ArrayMap<String, String> mps = new ArrayMap<String, String>();
 			mps.put("aid", eps.optString("id"));
 			mps.put("id", eps.optString("name", "[未获取到用户ID]"));
 			mps.put("nicheng", eps.optString("name_show", "[未获取到用户昵称]"));
@@ -554,17 +563,21 @@ public class Tools
 
 			String content = "";
 
-			ArrayList<ArrayMap<String, String>> lz = lzl.get(floor.get("pid"));
+			ArrayList<ArrayMap<String, String>> lzl = this.lzl.get(floor.get("pid"));
+			int len = 0;
+			if (lzl != null) {
+				len = lzl.size();
+			}
 			ArrayList<String> pr = new ArrayList<String>();
-			ArrayMap<String, String> elzl;
-			int len = lz.size();
+			ArrayMap<String, String> elzl = null;
 
-			content += "<a href=\"http://tieba.baidu.com/home/main/?un=" + floor.get("id") + "\">" + floor.get("nicheng") + "</a>   Level-" + floor.get("level") + "  :<br>" + floor.get("content") + "<br>     ------" + floor.get("floor") + "楼  " + floor.get("time") + "<br>";
-			content += "<hr><br>";
+			content += "<a href=\"http://tieba.baidu.com/home/main/?un=" + floor.get("id") + "\">" + floor.get("nicheng") + "</a>   Level-" + floor.get("level") + "  :<br>";
+			content += floor.get("content") + "<br><div style=\"float:right;\">------" + floor.get("floor") + "楼  " + floor.get("time") + "</div><br>";
+			content += "<hr>";
 
 			for (int i = 0; i < len; i++) {
-				elzl = lz.get(i);
-				content += "<a href=\"http://tieba.baidu.com/home/main/?un=" + elzl.get("id") + "\">" + elzl.get("nicheng") + "</a>: " + elzl.get("content") + "<br>     ------" + elzl.get("time") + "<br>";
+				elzl = lzl.get(i);
+				content += "<a href=\"http://tieba.baidu.com/home/main/?un=" + elzl.get("id") + "\">" + elzl.get("nicheng") + "</a>: " + elzl.get("content") + "<br><div style=\"float:right;\">------" + elzl.get("time") + "</div><br>";
 				pr.add(elzl.get("id"));
 				pr.add(elzl.get("nicheng"));
 			}
@@ -582,61 +595,61 @@ public class Tools
 			for (int i = 0; i < len; i++) {
 				text += anaContentToHtml(content.optJSONObject(i));
 			}
-			return null;
+			return text;
 		}
 		private String anaContentToHtml(JSONObject content) throws mException
 		{
 			String type = content.optString("type", "0");
 			String thing = "";
-			if (type == "0") {
+			if (type.equals("0")) {
 				//thing += (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
-				thing = content.optString("text", "");
-			} else if (type == "1") {
+				thing = content.optString("text", "[文本获取失败]");
+			} else if (type.equals("1")) {
 				//{"type":1,"link":"网址","text":"网址"}
 				//thing += "#链接=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"] + "#";
-				thing = "<a href=\"" + content.optString("link", "") + "\">" + content.optString("text", "") + "<\\a>";
+				thing = "<a href=\"" + content.optString("link", "") + "\">" + content.optString("text", "") + "</a>";
 				//控制台_输出(0, "#链接# " + (String)内容源码["post_list"][内容计数]["content"][文本计数]["link"]);
-			} else if (type == "2") {
+			} else if (type.equals("2")) {
 				//{"type": "2","text": "image_emoticon33","c": "喷"}
 				//thing += "#表情=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["c"] + "#";
 				thing = "[贴吧表情:" + content.optString("c") + "]";
-			} else if (type == "3") {
+			} else if (type.equals("3")) {
 				//{"type":3,"src":"链接","bsize":"189,199","size":"49634"}
 				//Console.WriteLine((String)内容源码["post_list"][内容计数]["content"].ToString());
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 				thing = "<img src=\"" + content.optString("origin_src") + "\" alt=\"图片加载失败，请反馈至1021263881@qq.com\" >";
-			} else if (type == "4") {
+			} else if (type.equals("4")) {
 				//thing += "#艾特=" + 内容源码["post_list"][内容计数]["content"][文本计数]["text"].ToString().Replace("@", "") + "#";
 				thing += "<a href=\"http://tieba.baidu.com/home/main/?un=" + UrlEncodeUtf_8(content.optString("text", "").replace("@", "")) + "\">" + content.optString("text", "") + "<\\a>";
-			} else if (type == "5") {
+			} else if (type.equals("5")) {
 				//{"type":5,"e_type":15,"width":"480","height":"480","bsize":"480,480","during_time":"2","origin_size":"168046","text":"http:\/\/tieba.baidu.com\/mo\/q\/movideo\/page?thumbnail=d109b3de9c82d158d3fcee1d880a19d8bc3e421b&video=10363_ed294eae88371575b3dbcf9f1990f68d","link":"http:\/\/tb-video.bdstatic.com\/tieba-smallvideo\/10363_ed294eae88371575b3dbcf9f1990f68d.mp4","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/d109b3de9c82d158d3fcee1d880a19d8bc3e421b.jpg","is_native_app":0,"native_app":[]}
 				//thing += "#视频#";
-			} else if (type == "7") {
+			} else if (type.equals("7")) {
 				//{"type":"7","text":"\n"}
 				thing = "<br>";
-			} else if (type == "9") {
+			} else if (type.equals("9")) {
 				//{"type":"9","text":"6666666","phonetype":"2"}
 				//thing += (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
 				thing = content.optString("text", "");
-			} else if (type == "10") {
+			} else if (type.equals("10")) {
 				//{"type":"10","during_time":"15000","voice_md5":"e25ef2db5076f825e229c6cdb1613f38_1064475243"}
 				//thing += "#语音=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["voice_md5"] + "," + (String)内容源码["post_list"][内容计数]["content"][文本计数]["during_time"] + "#";
-			} else if (type == "11") {
+			} else if (type.equals("11")) {
 				//{"type":"11","c":"白发魔女传之明月天国_女屌丝","static":"png静态图链接","dynamic":"gif动态图链接","height":"160","width":"160","icon":"http://tb2.bdstatic.com/tb/editor/images/faceshop/1058_baifa/panel.png","packet_name":"白发魔女传之明月天国"}
 				//thing += "#表情=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["c"] + "#";
-			} else if (type == "16") {
+			} else if (type.equals("16")) {
 				//{"type":"16","bsize":"560,560","graffiti_info":{"url":"jpg网页端原图","gid":"123456"},"cdn_src":"客户端缩略图","big_cdn_src":"客户端大图"}
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 				thing = "<img src=\"" + content.optJSONObject("graffiti_info").optString("url") + "alt=\"图片加载失败，请反馈至1021263881@qq.com\" >";
-			} else if (type == "17") {
+			} else if (type.equals("17")) {
 				//{"type":"17","high_together":{"album_id":"478448408116821906","album_name":"关于众筹西游记歌曲演唱会活动","start_time":"0","end_time":"0","location":"","num_join":"0","pic_urls":[]}}
 				//thing += "#活动=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["album_name"] + "#";
-			} else if (type == "18") {
+			} else if (type.equals("18")) {
 				//{"type":"18","text":"#白狐狸不改国庆礼包就滚出dnf#","link":"http://tieba.baidu.com/mo/q/hotMessage?topic_id=0&topic_name=白狐狸不改国庆礼包就滚出dnf"}
 				//thing += "#热议=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"] + "#";
-			} else if (type == "20") {
+			} else if (type.equals("20")) {
 				//{"type":"20","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","bsize":"375,348","meme_info":{"pck_id":"0","pic_id":"47098639564","width":"375","height":"348","pic_url":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","thumbnail":"http:\/\/imgsrc.baidu.com\/forum\/abpic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","detail_link":"http:\/\/tieba.baidu.com\/n\/interact\/emoticon\/0\/47098639564?frompb=1"}}
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["src"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["src"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["src"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
