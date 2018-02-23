@@ -35,18 +35,25 @@ public final class R {
         public static final int jumppage=0x7f070004;
         public static final int jumppagebutton=0x7f070003;
         public static final int jumppagetext=0x7f070005;
-        public static final int mainLinearLayout=0x7f07000b;
-        public static final int mainScrollView=0x7f07000a;
-        public static final int mainWebView=0x7f070009;
-        public static final int personNiCheng=0x7f07000d;
-        public static final int personbutton=0x7f07000e;
-        public static final int personid=0x7f07000c;
+        public static final int lzlContent=0x7f07000c;
+        public static final int lzlDate=0x7f07000d;
+        public static final int lzlID=0x7f07000a;
+        public static final int lzlIcon=0x7f070009;
+        public static final int lzlNickname=0x7f07000b;
+        public static final int mainLinearLayout=0x7f070011;
+        public static final int mainList=0x7f07000f;
+        public static final int mainScrollView=0x7f070010;
+        public static final int mainWebView=0x7f07000e;
+        public static final int personNiCheng=0x7f070013;
+        public static final int personbutton=0x7f070014;
+        public static final int personid=0x7f070012;
     }
     public static final class layout {
         public static final int actionbar=0x7f030000;
         public static final int jumpdialog=0x7f030001;
-        public static final int main=0x7f030002;
-        public static final int person=0x7f030003;
+        public static final int lzl=0x7f030002;
+        public static final int main=0x7f030003;
+        public static final int person=0x7f030004;
     }
     public static final class string {
         public static final int app_name=0x7f050000;

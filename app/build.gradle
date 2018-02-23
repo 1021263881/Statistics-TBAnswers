@@ -8,8 +8,8 @@ android {
         applicationId "com.fapple.tj"
         minSdkVersion 18
         targetSdkVersion 21
-        versionCode 5
-        versionName "1.0.0.0221"
+        versionCode 0221
+        versionName "1.0.0"
     }
     buildTypes {
         release {

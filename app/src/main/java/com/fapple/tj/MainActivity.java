@@ -13,6 +13,7 @@ import android.widget.*;
 import android.widget.RelativeLayout.*;
 import com.fapple.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -22,7 +23,7 @@ public class MainActivity extends Activity
 {
 	private Tools tool = new Tools();
 	//private Tools.HttpService httpservice = tool.new HttpService();
-	private Tools.TB tb = tool.new TB("4592800021");
+	private Tools.TB tb = tool.new TB(this, "4592800021");
 	private ClipboardManager cm = null;
 	private ProgressDialog pd = null;
 	private LinearLayout.LayoutParams personlp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -34,6 +35,8 @@ public class MainActivity extends Activity
 	private Button lastbutton;
 	private Button nextbutton;
 	private TextView midtext;
+	private ListView mlist;
+
 	//获取Alert
 	private AlertDialog mdialog;
 
@@ -239,22 +242,31 @@ public class MainActivity extends Activity
 							public void onClick(DialogInterface p1, int p2)
 							{
 								if (jumppagebutton.isChecked() == true) {
-									//Toast.makeText(MainActivity.this, "page", 0).show();
+									showWait("跳转中");
+
 									try {
 										ana(tb.jumpPage(Integer.valueOf(jumppageedit.getText().toString())));
-
-									} catch (mException e) {
-
-									}
-								} else if (jumpfloorbutton.isChecked() == true) {
-									//Toast.makeText(MainActivity.this, "floor", 0).show();
-									try {
-										ana(tb.jumpFloor(Integer.valueOf(jumpflooredit.getText().toString())));
-									} catch (mException e) {
-
 									} catch (NumberFormatException e) {
 
+									} catch (mException e) {
+										showWarning("", e.getMessage(), e.getMore(), true);
+									} finally {
+										killWait();
 									}
+								} else if (jumpfloorbutton.isChecked() == true) {
+									showWait("跳转中");
+
+									try {
+										ana(tb.jumpFloor(Integer.valueOf(jumpflooredit.getText().toString())));
+									} catch (NumberFormatException e) {
+
+									} catch (mException e) {
+										showWarning("", e.getMessage(), e.getMore(), true);
+									} finally {
+										killWait();
+									}
+								} else {
+									showtips("跳转失败", "你倒是选一个跳转方式啊", "oj8k");
 								}
 							}
 						});
@@ -284,6 +296,13 @@ public class MainActivity extends Activity
 		AlertDialog.Builder tips = new AlertDialog.Builder(MainActivity.this);
 		tips.setTitle(tipstitle);
 		tips.setMessage(tipsmess);
+		tips.setNegativeButton("ojbk", new DialogInterface.OnClickListener(){
+				@Override
+				public void onClick(DialogInterface p1, int p2)
+				{
+					// TODO: Implement this method
+				}
+			});
 		tips.setOnDismissListener(new DialogInterface.OnDismissListener(){
 				@Override
 				public void onDismiss(DialogInterface p1)
@@ -305,14 +324,13 @@ public class MainActivity extends Activity
 		web.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
 		web.getSettings().setLoadWithOverviewMode(true);//适应屏幕
 
+		//默认UTF-8
+		web.getSettings().setDefaultTextEncodingName("UTF-8");
+
 		//获取ScrollView
 		list = (LinearLayout)findViewById(R.id.mainLinearLayout);
+		mlist = (ListView)findViewById(R.id.mainList);
 
-		try {
-			ana(tb.jumpFloor(1));
-		} catch (mException e) {
-			
-		}
 	}
 	//统计
 	private Boolean updatePerson(int did, String id, String nicheng)
@@ -425,9 +443,24 @@ public class MainActivity extends Activity
 		}
 		updatePersonList(pr);
 	}
+	public void freshmax(int pagemax, int floormax){
+		this.pagemax = pagemax;
+		this.floormax = floormax;
+		
+		String te = "";
+		te += pagenow;
+		te += "/";
+		te += pagemax;
+		te += "页 ";
+		te += floornow;
+		te += "/";
+		te += floormax;
+		te += "楼";
+		midtext.setText(te);
+	}
 	public void freshmax()
 	{
-		waitDialog("正在获取信息...");
+		showWait("正在获取信息...");
 		if (floormax == 1) {
 			ArrayList<Integer> ma;
 			try {
@@ -457,11 +490,18 @@ public class MainActivity extends Activity
 		edit.setTextColor(getResources().getColor(colorid));
 		text.setTextColor(getResources().getColor(colorid));
 	}
-	private void showtips(String title, String message)
+	private void showtips(String title, String message, String negatiebutton)
 	{
 		AlertDialog.Builder tips = new AlertDialog.Builder(MainActivity.this);
 		tips.setTitle(title);
 		tips.setMessage(message);
+		tips.setNegativeButton(negatiebutton, new DialogInterface.OnClickListener(){
+				@Override
+				public void onClick(DialogInterface p1, int p2)
+				{
+					// TODO: Implement this method
+				}
+			});
 		tips.setOnDismissListener(new DialogInterface.OnDismissListener(){
 				@Override
 				public void onDismiss(DialogInterface p1)
@@ -489,26 +529,55 @@ public class MainActivity extends Activity
 			});
 		warn.show();
 	}
-	public void waitDialog(String message)
+	public void showWait(String message)
 	{
-		if (pd != null) {
-			pd.setMessage(message);
-		}
-		//等待框，下面是对应的关闭函数
-		if (pd == null) {
-			pd = new ProgressDialog(MainActivity.this);
-			pd.setIndeterminate(false);//循环滚动
-			pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-			pd.setMessage(message);
-			pd.setCancelable(false);//false不能取消显示，true可以取消显示
-			pd.show();
+		ExecutorService executor = Executors.newCachedThreadPool();
+		Task task = new Task(message);
+		FutureTask<Boolean> futureTask = new FutureTask<Boolean>(task);
+		executor.submit(futureTask);
+		executor.shutdown();
+		
+		try {
+			futureTask.get();
+		} catch (InterruptedException e) {
+			
+		} catch (ExecutionException e) {
+			
 		}
 	}
-	private void killWait()
+	public void killWait()
 	{
 		if (pd != null) {
 			pd.dismiss();
 			pd = null;
+		}
+	}
+	class Task implements Callable<Boolean>
+	{
+		private String message;
+		Task(String message)
+		{
+			this.message = message;
+		}
+		@Override
+		public Boolean call() throws mException
+		{
+			if (pd != null) {
+				pd.setMessage(message);
+			}else{
+				throw new mException("", "");
+			}
+			
+			//等待框，下面是对应的关闭函数
+			if (pd == null) {
+				pd = new ProgressDialog(MainActivity.this);
+				pd.setIndeterminate(false);//循环滚动
+				pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+				pd.setMessage(message);
+				pd.setCancelable(false);//false不能取消显示，true可以取消显示
+				pd.show();
+			}
+			return true;
 		}
 	}
 }

@@ -11,6 +11,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
 import org.json.*;
+import android.app.*;
+import com.fapple.tj.*;
 
 public class Tools
 {
@@ -195,6 +197,7 @@ public class Tools
 		private int indexInList = 0;
 
 		private String tid = "";
+		private MainActivity main;
 
 		//对楼层，楼中楼，user建档
 		private ArrayMap<Integer, ArrayList<ArrayMap<String, String>>> flr = new ArrayMap<Integer, ArrayList<ArrayMap<String, String>>>();
@@ -207,8 +210,9 @@ public class Tools
 
 		HttpService httpService = new HttpService();
 
-		public TB(String tid)
+		public TB(MainActivity main, String tid)
 		{
+			this.main = main;
 			this.tid = tid;
 
 			//初始化楼层
@@ -289,6 +293,13 @@ public class Tools
 			return floornow;
 		}
 
+		public void toLastFloor(){
+			
+		}public void toNextFloor(){
+			
+		}public void toNextPage(){
+			
+		}
 		public ArrayList<String> getLastFloor() throws mException
 		{
 			if (indexInList == 0) {
@@ -336,26 +347,50 @@ public class Tools
 		}
 		public ArrayList<String> jumpFloor(int floor) throws mException
 		{
-			if (floor < floormax) {
+			if (floor > floormax) {
 				getMax();
-				if (floor < floormax) {
-					throw new mException("", "");
+				if (floor > floormax) {
+					throw new mException("楼层超出范围", "");
 				} else {
 					return jumpFloor(floor);
 				}
 			} else {
 				if (floor > floornow) {
-					ArrayList<String> f = getNextFloor();
-					while (Integer.valueOf(f.get(2)) < floor) {
-						f = getNextFloor();
+					ArrayList<ArrayMap<String, String>> page;
+					ArrayMap<String, String> flmap;
+					//遍历page
+					for(int p = pagenow; p <= pagemax; p++){
+						if(flr.containsKey(p) == false){
+							getPage("", tid, p);
+						}
+						page = flr.get(p);
+						//遍历楼层
+						for(int i = page.size() - 1; i > -1; i--){
+							flmap = page.get(i);
+							if(Integer.valueOf(flmap.get("floor")) >= floor){
+								return getReturn(flmap);
+							}
+						}
 					}
-					return f;
+					throw new mException("没有找到该楼层", "");
 				} else if (floor < floornow) {
-					ArrayList<String> f = getLastFloor();
-					while (Integer.valueOf(f.get(2)) > floor) {
-						f = getLastFloor();
+					ArrayList<ArrayMap<String, String>> page;
+					ArrayMap<String, String> flmap;
+					//遍历page
+					for(int p = pagenow; p > 0; p--){
+						if(flr.containsKey(p) == false){
+							getPage("", tid, p);
+						}
+						page = flr.get(p);
+						//遍历楼层
+						for(int i = 0; i < page.size(); i++){
+							flmap = page.get(i);
+							if(Integer.valueOf(flmap.get("floor")) <= floor){
+								return getReturn(flmap);
+							}
+						}
 					}
-					return f;
+					throw new mException("没有找到该楼层", "");
 				} else {
 					return getReturn(flr.get(pagenow).get(indexInList));
 				}
@@ -398,6 +433,9 @@ public class Tools
 			//return list.optJSONArray("thread_list");
 			return null;
 		}
+		private void getPage(String cookie, String tid, int pn) throws mException{
+			getPage(cookie, tid, pn, false);
+		}
 		private void getPage(String cookie, String tid, int pn, boolean daoxu) throws mException
 		{
 			String url = "http://c.tieba.baidu.com/c/f/pb/page";
@@ -423,6 +461,9 @@ public class Tools
 			pagemax = Integer.valueOf(page.optJSONObject("page").optString("total_page", String.valueOf(pagemax)));
 			if (daoxu == false) {
 				pagenow = Integer.valueOf(page.optJSONObject("page").optString("current_page", String.valueOf(pagenow)));
+			}
+			if(pagenow > pagemax){
+				pagenow = pagemax;
 			}
 			if (anaPerson(page.optJSONArray("user_list")) == false) {
 				throw new mException("解析page的user_list错误");
@@ -572,7 +613,7 @@ public class Tools
 			ArrayMap<String, String> elzl = null;
 
 			content += "<a href=\"http://tieba.baidu.com/home/main/?un=" + floor.get("id") + "\">" + floor.get("nicheng") + "</a>   Level-" + floor.get("level") + "  :<br>";
-			content += floor.get("content") + "<br><div style=\"float:right;\">------" + floor.get("floor") + "楼  " + floor.get("time") + "</div><br>";
+			content += floor.get("content") + "<br><br><div style=\"float:right;\">------" + floor.get("floor") + "楼  " + floor.get("time") + "</div><br>";
 			content += "<hr>";
 
 			for (int i = 0; i < len; i++) {
@@ -621,7 +662,7 @@ public class Tools
 				thing = "<img src=\"" + content.optString("origin_src") + "\" alt=\"图片加载失败，请反馈至1021263881@qq.com\" >";
 			} else if (type.equals("4")) {
 				//thing += "#艾特=" + 内容源码["post_list"][内容计数]["content"][文本计数]["text"].ToString().Replace("@", "") + "#";
-				thing += "<a href=\"http://tieba.baidu.com/home/main/?un=" + UrlEncodeUtf_8(content.optString("text", "").replace("@", "")) + "\">" + content.optString("text", "") + "<\\a>";
+				thing += "<a href=\"http://tieba.baidu.com/home/main/?un=" + UrlEncodeUtf_8(content.optString("text", "").replace("@", "")) + "\">" + content.optString("text", "") + "</a>";
 			} else if (type.equals("5")) {
 				//{"type":5,"e_type":15,"width":"480","height":"480","bsize":"480,480","during_time":"2","origin_size":"168046","text":"http:\/\/tieba.baidu.com\/mo\/q\/movideo\/page?thumbnail=d109b3de9c82d158d3fcee1d880a19d8bc3e421b&video=10363_ed294eae88371575b3dbcf9f1990f68d","link":"http:\/\/tb-video.bdstatic.com\/tieba-smallvideo\/10363_ed294eae88371575b3dbcf9f1990f68d.mp4","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/d109b3de9c82d158d3fcee1d880a19d8bc3e421b.jpg","is_native_app":0,"native_app":[]}
 				//thing += "#视频#";
