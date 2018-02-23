@@ -42,10 +42,10 @@ public class Tools
 	public static void copyToClipBoard(ClipboardManager cm, String text)
 	{
 		// 从API11开始android推荐使用android.content.ClipboardManager
-        // 为了兼容低版本我们这里使用旧版的android.text.ClipboardManager，虽然提示deprecated，但不影响使用。
-        //ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        // 将文本内容放到系统剪贴板里。
-        cm.setText(text);
+		// 为了兼容低版本我们这里使用旧版的android.text.ClipboardManager，虽然提示deprecated，但不影响使用。
+		//ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+		// 将文本内容放到系统剪贴板里。
+		cm.setText(text);
 
 		/*A. 创建普通字符型ClipData：
 		 ClipData mClipData =ClipData.newPlainText("Label", "Content");         //‘Label’这是任意文字标签
@@ -152,16 +152,16 @@ public class Tools
 		}
 		digest.update(content.getBytes());
 
-        StringBuilder builder = new StringBuilder();
-        for (byte b : digest.digest()) {
-            builder.append(Integer.toHexString((b >> 4) & 0xf));
-            builder.append(Integer.toHexString(b & 0xf));
-        }
-        return builder.toString().toLowerCase();
-    }
+		StringBuilder builder = new StringBuilder();
+		for (byte b : digest.digest()) {
+			builder.append(Integer.toHexString((b >> 4) & 0xf));
+			builder.append(Integer.toHexString(b & 0xf));
+		}
+		return builder.toString().toLowerCase();
+	}
 
 	//字符串转时间戳
-    /*public static String strTimeToUnix(String time)
+	/*public static String strTimeToUnix(String time)
 	 {
 	 String timeStamp = null;
 	 //日期格式，yyyy-MM-dd HH:mm:ss
@@ -292,15 +292,97 @@ public class Tools
 		{
 			return floornow;
 		}
-
 		public void toLastFloor(){
+			ExecutorService executor = Executors.newCachedThreadPool();
+			Task task = new Task(1);
+			FutureTask<Boolean> futureTask = new FutureTask<Boolean>(task);
+			executor.submit(futureTask);
+			executor.shutdown();
+			try {
+				futureTask.get();
+			} catch (InterruptedException e) {
 			
-		}public void toNextFloor(){
+			} catch (ExecutionException e) {
 			
-		}public void toNextPage(){
-			
+			}
 		}
-		public ArrayList<String> getLastFloor() throws mException
+		public void toNextFloor(){
+			ExecutorService executor = Executors.newCachedThreadPool();
+			Task task = new Task(2);
+			FutureTask<Boolean> futureTask = new FutureTask<Boolean>(task);
+			executor.submit(futureTask);
+			executor.shutdown();
+			try {
+				futureTask.get();
+			} catch (InterruptedException e) {
+			
+			} catch (ExecutionException e) {
+			
+			}
+		}
+		public void jumpFloor(int floor){
+			ExecutorService executor = Executors.newCachedThreadPool();
+			Task task = new Task(3, floor);
+			FutureTask<Boolean> futureTask = new FutureTask<Boolean>(task);
+			executor.submit(futureTask);
+			executor.shutdown();
+			try {
+				futureTask.get();
+			} catch (InterruptedException e) {
+			
+			} catch (ExecutionException e) {
+			
+			}
+		}
+		public void jumpPage(int page){
+			ExecutorService executor = Executors.newCachedThreadPool();
+			Task task = new Task(4, page);
+			FutureTask<Boolean> futureTask = new FutureTask<Boolean>(task);
+			executor.submit(futureTask);
+			executor.shutdown();
+			try {
+				futureTask.get();
+			} catch (InterruptedException e) {
+			
+			} catch (ExecutionException e) {
+			
+			}
+		}
+		class Task implements Callable<Boolean>
+		{
+			private int met;
+			private int thing;
+			Task(int met){
+				this.met = met;
+			}
+			Task(int met, int thing)
+			{
+				this.met = met;
+				this.thing = thing;
+			}
+			@Override
+			public Boolean call() throws mException
+			{
+				switch(met){
+					case 1:
+						main.ana(getLastFloor());
+						break;
+					case 2:
+						main.ana(getNextFloor());
+						break;
+					case 3:
+						main.ana(jumpPage(thing));
+						break;
+					case 4:
+						main.ana(jumpFloor(thing));
+						break;
+					default:
+						return false;
+				}
+				return true;
+			}
+		}
+		private ArrayList<String> getLastFloor() throws mException
 		{
 			if (indexInList == 0) {
 				if (pagenow > 1) {
@@ -316,7 +398,7 @@ public class Tools
 				return getReturn(flr.get(pagenow).get(indexInList));
 			}
 		}
-		public ArrayList<String> getNextFloor() throws mException
+		private ArrayList<String> getNextFloor() throws mException
 		{
 			if (indexInList == flr.get(pagenow).size() - 1) {
 				if (pagenow < pagemax) {
@@ -336,7 +418,7 @@ public class Tools
 				return getReturn(flr.get(pagenow).get(indexInList));
 			}
 		}
-		public ArrayList<String> getNextPage() throws mException
+		private ArrayList<String> getNextPage() throws mException
 		{
 			if (pagenow < pagemax) {
 				pagenow ++;
@@ -345,7 +427,7 @@ public class Tools
 				throw new mException("获取下一页失败", "获取下一页失败, page=" + pagenow + ", pagemax=" + pagemax);
 			}
 		}
-		public ArrayList<String> jumpFloor(int floor) throws mException
+		private ArrayList<String> jumpFloor(int floor) throws mException
 		{
 			if (floor > floormax) {
 				getMax();
@@ -396,7 +478,7 @@ public class Tools
 				}
 			}
 		}
-		public ArrayList<String> jumpPage(int page) throws mException 
+		private ArrayList<String> jumpPage(int page) throws mException 
 		{
 			indexInList = 0;
 			getPage("", tid, page, false);
@@ -940,6 +1022,15 @@ public class Tools
 			is.close();
 			byte[] byteArray = baos.toByteArray();
 			return new String(byteArray);
+		}
+	}
+	public class mAdapter extends BaseAdapter{
+		private ArrayList<ArrayMap<String, String>> list;
+		private Context context;
+
+		mAdapter(Context context, ArrayList<ArrayMap<String, String>> list){
+			this.context = context;
+			this.list = list;
 		}
 	}
 }
