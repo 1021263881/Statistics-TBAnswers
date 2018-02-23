@@ -14,6 +14,7 @@ import android.widget.RelativeLayout.*;
 import com.fapple.*;
 import java.util.*;
 import java.util.concurrent.*;
+import android.widget.*;
 
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -243,28 +244,20 @@ public class MainActivity extends Activity
 							{
 								if (jumppagebutton.isChecked() == true) {
 									showWait("跳转中");
-
-									try {
-										ana(tb.jumpPage(Integer.valueOf(jumppageedit.getText().toString())));
-									} catch (NumberFormatException e) {
-
-									} catch (mException e) {
-										showWarning("", e.getMessage(), e.getMore(), true);
-									} finally {
-										killWait();
+									double dpage = Integer.valueOf(jumppageedit.getText().toString());
+									int page;
+									if(dpage < pagemax + 200 && dpage > 0){
+										page = Integer.valueOf(dpage);
 									}
+									tb.jumpFloor(page);
 								} else if (jumpfloorbutton.isChecked() == true) {
 									showWait("跳转中");
-
-									try {
-										ana(tb.jumpFloor(Integer.valueOf(jumpflooredit.getText().toString())));
-									} catch (NumberFormatException e) {
-
-									} catch (mException e) {
-										showWarning("", e.getMessage(), e.getMore(), true);
-									} finally {
-										killWait();
+									double dfloor = Integer.valueOf(jumpflooredit.getText().toString());
+									int floor;
+									if(dfloor < floormax + 10 && dfloor > 0){
+										floor = Integer.valueOf(dfloor);
 									}
+									tb.jumpPage(floor);
 								} else {
 									showtips("跳转失败", "你倒是选一个跳转方式啊", "oj8k");
 								}
@@ -332,6 +325,7 @@ public class MainActivity extends Activity
 		mlist = (ListView)findViewById(R.id.mainList);
 
 	}
+
 	//统计
 	private Boolean updatePerson(int did, String id, String nicheng)
 	{
@@ -418,6 +412,7 @@ public class MainActivity extends Activity
 	}
 	private void ana(ArrayList<String> list) throws mException
 	{
+		showWait("加载中...");
 		if (list.size() < 5) {
 			throw new mException("传值过少", "ana错误, ana.size=" + list.size());
 		}
@@ -442,6 +437,7 @@ public class MainActivity extends Activity
 			}
 		}
 		updatePersonList(pr);
+		killWait;
 	}
 	public void freshmax(int pagemax, int floormax){
 		this.pagemax = pagemax;
