@@ -219,7 +219,7 @@ public class Tools
 			/*mflr.put("tid", "");//4592800021
 			 mflr.put("pid", "");
 			 mflr.put("id", "");
-			 mflr.put("nicheng", "");
+			 mflr.put("nickname", "");
 			 mflr.put("level", "");
 			 mflr.put("content", "");
 			 mflr.put("floor", "");
@@ -230,13 +230,13 @@ public class Tools
 			 mlzl.put("pid", "");
 			 mlzl.put("spid", "");
 			 mlzl.put("id", "");
-			 mlzl.put("nicheng", "");
+			 mlzl.put("nickname", "");
 			 mlzl.put("level", "");
 			 mlzl.put("content", "");
 			 mlzl.put("time", "");
 
 			 mps.put("id", "");
-			 mps.put("nicheng", "");
+			 mps.put("nickname", "");
 			 mps.put("level", "");
 			 mps.put("aid", "");*/
 
@@ -259,20 +259,28 @@ public class Tools
 
 		public ArrayList<Integer> getMax() throws mException
 		{
-			String url = "https://tieba.baidu.com/p/4592800021?last=1";
-			String thing = httpService.get(url, "");
-			ArrayList<Integer> all = new ArrayList<Integer>();
-			if (thing != "" && thing != null) {
-				String maxpage = ZZ(thing, "第\\d+/\\d+页", false, 0);
-				maxpage = ZZ(maxpage, "\\d+", false, 1);
-				String maxfloor = "";
-				maxfloor = ZZ(thing, "<div class=\"i\">\\d+楼\\.", false, 0);
-				maxfloor = ZZ(maxfloor, "\\d+", false, 0);
+			String url = "http://c.tieba.baidu.com/c/f/pb/page";
+			String data = "";
+			data += "&_client_id=" + getStamp();
+			data += "&_client_type=2&_client_version=8.8.8.3";
+			data += "&kz=" + tid;
+			data += "&last=1&r=1";
+			data += "&sign=" + sign(data);
+
+			String thing = httpService.post(url, data);
+
+			JSONObject page;
+			try {
+				page = new JSONObject(thing);
+				String maxpage = page.optJSONObject("page").optString("total_page");
+				String maxfloor = page.optJSONArray("post_list").optJSONObject(0).optString("floor");
 				all.add(Integer.valueOf(maxpage));
 				all.add(Integer.valueOf(maxfloor));
 
 				pagemax = Integer.valueOf(maxpage);
 				floormax = Integer.valueOf(maxfloor);
+			} catch (JSONException e) {
+				throw new mException("JSON解析好像遇到问题了", "获取帖子JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
 			}
 			return all;
 		}
@@ -292,96 +300,7 @@ public class Tools
 		{
 			return floornow;
 		}
-		public void toLastFloor(){
-			ExecutorService executor = Executors.newCachedThreadPool();
-			Task task = new Task(1);
-			FutureTask<Boolean> futureTask = new FutureTask<Boolean>(task);
-			executor.submit(futureTask);
-			executor.shutdown();
-			try {
-				futureTask.get();
-			} catch (InterruptedException e) {
-			
-			} catch (ExecutionException e) {
-			
-			}
-		}
-		public void toNextFloor(){
-			ExecutorService executor = Executors.newCachedThreadPool();
-			Task task = new Task(2);
-			FutureTask<Boolean> futureTask = new FutureTask<Boolean>(task);
-			executor.submit(futureTask);
-			executor.shutdown();
-			try {
-				futureTask.get();
-			} catch (InterruptedException e) {
-			
-			} catch (ExecutionException e) {
-			
-			}
-		}
-		public void jumpFloor(int floor){
-			ExecutorService executor = Executors.newCachedThreadPool();
-			Task task = new Task(3, floor);
-			FutureTask<Boolean> futureTask = new FutureTask<Boolean>(task);
-			executor.submit(futureTask);
-			executor.shutdown();
-			try {
-				futureTask.get();
-			} catch (InterruptedException e) {
-			
-			} catch (ExecutionException e) {
-			
-			}
-		}
-		public void jumpPage(int page){
-			ExecutorService executor = Executors.newCachedThreadPool();
-			Task task = new Task(4, page);
-			FutureTask<Boolean> futureTask = new FutureTask<Boolean>(task);
-			executor.submit(futureTask);
-			executor.shutdown();
-			try {
-				futureTask.get();
-			} catch (InterruptedException e) {
-			
-			} catch (ExecutionException e) {
-			
-			}
-		}
-		class Task implements Callable<Boolean>
-		{
-			private int met;
-			private int thing;
-			Task(int met){
-				this.met = met;
-			}
-			Task(int met, int thing)
-			{
-				this.met = met;
-				this.thing = thing;
-			}
-			@Override
-			public Boolean call() throws mException
-			{
-				switch(met){
-					case 1:
-						main.ana(getLastFloor());
-						break;
-					case 2:
-						main.ana(getNextFloor());
-						break;
-					case 3:
-						main.ana(jumpPage(thing));
-						break;
-					case 4:
-						main.ana(jumpFloor(thing));
-						break;
-					default:
-						return false;
-				}
-				return true;
-			}
-		}
+		
 		private ArrayList<String> getLastFloor() throws mException
 		{
 			if (indexInList == 0) {
@@ -402,9 +321,7 @@ public class Tools
 		{
 			if (indexInList == flr.get(pagenow).size() - 1) {
 				if (pagenow < pagemax) {
-					pagenow ++;
-					jumpPage(pagenow);
-					return getReturn(flr.get(pagenow).get(indexInList));
+					return getReturn(getNextPage());
 				} else {
 					getMax();
 					if (pagenow < pagemax) {
@@ -422,21 +339,18 @@ public class Tools
 		{
 			if (pagenow < pagemax) {
 				pagenow ++;
-				return getReturn(flr.get(pagenow).get(indexInList));
+				return getReturn(jumpPage(pagenow));
 			} else {
-				throw new mException("获取下一页失败", "获取下一页失败, page=" + pagenow + ", pagemax=" + pagemax);
+				getMax();
+				if (pagenow < pagemax) {
+					return getNextPage();
+				} else {
+					throw new mException("获取下一页失败", "获取下一页失败, page=" + pagenow + ", pagemax=" + pagemax);
+				}
 			}
 		}
 		private ArrayList<String> jumpFloor(int floor) throws mException
 		{
-			if (floor > floormax) {
-				getMax();
-				if (floor > floormax) {
-					throw new mException("楼层超出范围", "");
-				} else {
-					return jumpFloor(floor);
-				}
-			} else {
 				if (floor > floornow) {
 					ArrayList<ArrayMap<String, String>> page;
 					ArrayMap<String, String> flmap;
@@ -476,7 +390,6 @@ public class Tools
 				} else {
 					return getReturn(flr.get(pagenow).get(indexInList));
 				}
-			}
 		}
 		private ArrayList<String> jumpPage(int page) throws mException 
 		{
@@ -502,7 +415,7 @@ public class Tools
 			data += 贴吧名_URL_UTF8;
 			data += "&pn=" + pn;
 			data += "&rn=50";
-			data += "&sort_type=" + sorttype;
+			data += "&sort_type=" + sorttype;//回复0发帖1智障3
 			data += "&sign=" + sign(data);
 
 			String thing = httpService.post(url, data);
@@ -599,7 +512,7 @@ public class Tools
 				nflr.put("pid", fl.optString("id", ""));
 				epg = ps.get(fl.optString("author_id", ""));
 				nflr.put("id", epg.get("id"));
-				nflr.put("nicheng", epg.get("nicheng"));
+				nflr.put("nickname", epg.get("nickname"));
 				nflr.put("level", epg.get("level"));
 				nflr.put("content", anaContent(fl.optJSONArray("content")));
 				nflr.put("floor", fl.optString("floor", ""));
@@ -627,7 +540,7 @@ public class Tools
 				nlzl.put("spid", fl.optString("id"));
 				epg = anaPerson(fl.optJSONObject("author"));
 				nlzl.put("id", epg.get("id"));
-				nlzl.put("nicheng", epg.get("nicheng"));
+				nlzl.put("nickname", epg.get("nickname"));
 				nlzl.put("level", epg.get("level"));
 				nlzl.put("content", anaContent(fl.optJSONArray("content")));
 				nlzl.put("time", unixToStrTime(fl.optString("time")));
@@ -649,7 +562,7 @@ public class Tools
 				mps = new ArrayMap<String, String>();
 				mps.put("aid", eps.optString("id", ""));
 				mps.put("id", eps.optString("name", "[未获取到用户ID]"));
-				mps.put("nicheng", eps.optString("name_show", "[未获取到用户昵称]"));
+				mps.put("nickname", eps.optString("name_show", "[未获取到用户昵称]"));
 				mps.put("level", eps.optString("level_id", "[未获取到用户等级]"));
 				pslist.put(mps.get("aid").toString(), new ArrayMap<String, String>(mps));
 			}
@@ -668,7 +581,7 @@ public class Tools
 			ArrayMap<String, String> mps = new ArrayMap<String, String>();
 			mps.put("aid", eps.optString("id"));
 			mps.put("id", eps.optString("name", "[未获取到用户ID]"));
-			mps.put("nicheng", eps.optString("name_show", "[未获取到用户昵称]"));
+			mps.put("nickname", eps.optString("name_show", "[未获取到用户昵称]"));
 			mps.put("level", eps.optString("level_id", "[未获取到用户等级]"));
 			ps.put(mps.get("aid"), mps);
 			return mps;
@@ -694,15 +607,15 @@ public class Tools
 			ArrayList<String> pr = new ArrayList<String>();
 			ArrayMap<String, String> elzl = null;
 
-			content += "<a href=\"http://tieba.baidu.com/home/main/?un=" + floor.get("id") + "\">" + floor.get("nicheng") + "</a>   Level-" + floor.get("level") + "  :<br>";
+			content += "<a href=\"http://tieba.baidu.com/home/main/?un=" + floor.get("id") + "\">" + floor.get("nickname") + "</a>   Level-" + floor.get("level") + "  :<br>";
 			content += floor.get("content") + "<br><br><div style=\"float:right;\">------" + floor.get("floor") + "楼  " + floor.get("time") + "</div><br>";
 			content += "<hr>";
 
 			for (int i = 0; i < len; i++) {
 				elzl = lzl.get(i);
-				content += "<a href=\"http://tieba.baidu.com/home/main/?un=" + elzl.get("id") + "\">" + elzl.get("nicheng") + "</a>: " + elzl.get("content") + "<br><div style=\"float:right;\">------" + elzl.get("time") + "</div><br>";
+				content += "<a href=\"http://tieba.baidu.com/home/main/?un=" + elzl.get("id") + "\">" + elzl.get("nickname") + "</a>: " + elzl.get("content") + "<br><div style=\"float:right;\">------" + elzl.get("time") + "</div><br>";
 				pr.add(elzl.get("id"));
-				pr.add(elzl.get("nicheng"));
+				pr.add(elzl.get("nickname"));
 			}
 			thing.add(content);
 			thing.addAll(pr);
