@@ -85,7 +85,7 @@ public class MainActivity extends Activity
 		none = getResources().getDrawable(R.drawable.none);
 
 		//设置ntj模板
-		ntj.put("nicheng", "");
+		ntj.put("nickname", "");
 		ntj.put("yx", "1");
 		ntj.put("gzl", "0");
 
@@ -96,7 +96,7 @@ public class MainActivity extends Activity
 			{
 				Drawable pbuttonback = p1.getBackground();
 				TextView id = (TextView)((View)p1.getParent()).findViewById(R.id.personid);
-				TextView nicheng = (TextView)((View)p1.getParent()).findViewById(R.id.personNiCheng);
+				TextView nickname = (TextView)((View)p1.getParent()).findViewById(R.id.personnickname);
 				int did = 0;
 				if (pbuttonback == none) {
 					p1.setBackground(ojbk);
@@ -109,7 +109,7 @@ public class MainActivity extends Activity
 					did = -1;
 				}
 				if (did != 0) {
-					updatePerson(did, id.getText().toString(), nicheng.getText().toString());
+					updatePerson(did, id.getText().toString(), nickname.getText().toString());
 				}
 			}
 		};
@@ -327,7 +327,7 @@ public class MainActivity extends Activity
 	}
 
 	//统计
-	private Boolean updatePerson(int did, String id, String nicheng)
+	private Boolean updatePerson(int did, String id, String nickname)
 	{
 		hasCopy = 0;
 		int old;
@@ -343,7 +343,7 @@ public class MainActivity extends Activity
 					}
 				} else {
 					tj.put(id, new ArrayMap<String, String>(ntj));
-					if (nicheng == tj.get(id).put("nicheng", nicheng)) {
+					if (nickname == tj.get(id).put("nickname", nickname)) {
 						return true;
 					}
 				}
@@ -395,7 +395,7 @@ public class MainActivity extends Activity
 
 			//设置id, 昵称
 			((TextView)person.findViewById(R.id.personid)).setText(personlist.get(i));
-			((TextView)person.findViewById(R.id.personNiCheng)).setText(personlist.get(i + 1));
+			((TextView)person.findViewById(R.id.personnickname)).setText(personlist.get(i + 1));
 
 			//设置按钮监听
 			person.findViewById(R.id.personbutton).setBackground(none);
