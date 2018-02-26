@@ -19,7 +19,7 @@
 		android:text="1/1页 1/1楼"
 		android:lines="1"
 		android:gravity="center"
-		android:textSize="22sp"
+		android:textSize="20sp"
 		android:id="@+id/actionbarmidtext"
 		android:ems="9"/>
 
