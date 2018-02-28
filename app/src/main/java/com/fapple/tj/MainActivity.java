@@ -395,7 +395,7 @@ public class MainActivity extends Activity
 
 			//设置id, 昵称
 			((TextView)person.findViewById(R.id.personid)).setText(personlist.get(i));
-			((TextView)person.findViewById(R.id.personnickname)).setText(personlist.get(i + 1));
+			((TextView)person.findViewById(R.id.personNiCheng)).setText(personlist.get(i + 1));
 
 			//设置按钮监听
 			person.findViewById(R.id.personbutton).setBackground(none);
@@ -437,7 +437,7 @@ public class MainActivity extends Activity
 			}
 		}
 		updatePersonList(pr);
-		killWait;
+		killWait();
 	}
 	public void freshmax(int pagemax, int floormax){
 		this.pagemax = pagemax;

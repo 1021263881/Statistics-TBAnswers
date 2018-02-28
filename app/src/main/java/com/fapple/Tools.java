@@ -1,8 +1,11 @@
 package com.fapple;
 
+import android.content.*;
 import android.text.*;
 import android.util.*;
 import android.webkit.*;
+import android.widget.*;
+import com.fapple.tj.*;
 import java.io.*;
 import java.net.*;
 import java.security.*;
@@ -11,8 +14,9 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
 import org.json.*;
-import android.app.*;
-import com.fapple.tj.*;
+
+import android.text.ClipboardManager;
+import android.view.*;
 
 public class Tools
 {
@@ -66,9 +70,12 @@ public class Tools
 	//Url编码
 	public static String UrlEncodeUtf_8(String str) throws mException
 	{
-		try {
+		try
+		{
 			return URLEncoder.encode(str, "utf-8");
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e)
+		{
 			throw new mException("Url编码出错了喵~", "UrlEncode出错，编码前文本:“" + str + "”错误信息:" + e.toString() + "\n" + e.getMessage());
 		}
 	}
@@ -76,9 +83,12 @@ public class Tools
 	//Url解码
 	public static String UrlDecodeUtf_8(String str)throws mException
 	{
-		try {
+		try
+		{
 			return URLDecoder.decode(str, "utf-8");
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e)
+		{
 			throw new mException("Url解码出错了喵~", "UrlDecode出错，编码前文本:“" + str + "”错误信息:" + e.toString() + "\n" + e.getMessage());
 		}
 	}
@@ -86,44 +96,60 @@ public class Tools
 	//正则匹配 index re0
 	public static String ZZ(String str, String biaodashi, Boolean daxiaoxie, int index)
 	{
-		if (str == "" || str == null || biaodashi == "" || biaodashi == null || index < 0) {
+		if (str == "" || str == null || biaodashi == "" || biaodashi == null || index < 0)
+		{
 			return null;
 		}
 		Pattern pa;
-		if (daxiaoxie == true) {
+		if (daxiaoxie == true)
+		{
 			pa = Pattern.compile(biaodashi);
-		} else {
+		}
+		else
+		{
 			pa = Pattern.compile(biaodashi, Pattern.CASE_INSENSITIVE);
 		}
 		Matcher ma = pa.matcher(str);
-		for (int i = 0; i < index; i++) {
-			if (ma.find()) {
+		for (int i = 0; i < index; i++)
+		{
+			if (ma.find())
+			{
 				ma.group();
-			} else {
+			}
+			else
+			{
 				break;
 			}
 		}
-		if (ma.find()) {
+		if (ma.find())
+		{
 			return ma.group();
-		} else {
+		}
+		else
+		{
 			return null;
 		}
 	}
 	public ArrayList<String> ZZall(String str, String biaodashi, Boolean daxiaoxie, int index)
 	{
 		ArrayList<String> list = new ArrayList<String>();
-		if (str == "" || str == null || biaodashi == "" || biaodashi == null || index < 0) {
+		if (str == "" || str == null || biaodashi == "" || biaodashi == null || index < 0)
+		{
 			return list;
 		}
 		Pattern pa;
-		if (daxiaoxie == true) {
+		if (daxiaoxie == true)
+		{
 			pa = Pattern.compile(biaodashi);
-		} else {
+		}
+		else
+		{
 			pa = Pattern.compile(biaodashi, Pattern.CASE_INSENSITIVE);
 		}
 		Matcher ma = pa.matcher(str);
 		//ma.matches();
-		while (ma.find()) {
+		while (ma.find())
+		{
 			list.add(ma.group());
 		}
 		return list;
@@ -145,15 +171,19 @@ public class Tools
 	public static String getMD5(String content) throws mException
 	{
 		MessageDigest digest;
-		try {
+		try
+		{
 			digest = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e) {
+		}
+		catch (NoSuchAlgorithmException e)
+		{
 			throw new mException("取MD5出错了喵~", "取MD5错误，编码前文本:“" + content + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
 		}
 		digest.update(content.getBytes());
 
 		StringBuilder builder = new StringBuilder();
-		for (byte b : digest.digest()) {
+		for (byte b : digest.digest())
+		{
 			builder.append(Integer.toHexString((b >> 4) & 0xf));
 			builder.append(Integer.toHexString(b & 0xf));
 		}
@@ -240,9 +270,12 @@ public class Tools
 			 mps.put("level", "");
 			 mps.put("aid", "");*/
 
-			try {
+			try
+			{
 				jumpPage(1);
-			} catch (mException e) {
+			}
+			catch (mException e)
+			{
 
 			}
 		}
@@ -268,9 +301,11 @@ public class Tools
 			data += "&sign=" + sign(data);
 
 			String thing = httpService.post(url, data);
+			ArrayList<Integer> all = new ArrayList<Integer>();
 
 			JSONObject page;
-			try {
+			try
+			{
 				page = new JSONObject(thing);
 				String maxpage = page.optJSONObject("page").optString("total_page");
 				String maxfloor = page.optJSONArray("post_list").optJSONObject(0).optString("floor");
@@ -279,7 +314,9 @@ public class Tools
 
 				pagemax = Integer.valueOf(maxpage);
 				floormax = Integer.valueOf(maxfloor);
-			} catch (JSONException e) {
+			}
+			catch (JSONException e)
+			{
 				throw new mException("JSON解析好像遇到问题了", "获取帖子JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
 			}
 			return all;
@@ -300,104 +337,141 @@ public class Tools
 		{
 			return floornow;
 		}
-		
+
 		private ArrayList<String> getLastFloor() throws mException
 		{
-			if (indexInList == 0) {
-				if (pagenow > 1) {
+			if (indexInList == 0)
+			{
+				if (pagenow > 1)
+				{
 					pagenow --;
 					jumpPage(pagenow);
 					indexInList = flr.get(pagenow).size() - 1;
 					return getReturn(flr.get(pagenow).get(indexInList));
-				} else {
+				}
+				else
+				{
 					throw new mException("已经是第一页了", "");
 				}
-			} else {
+			}
+			else
+			{
 				indexInList--;
 				return getReturn(flr.get(pagenow).get(indexInList));
 			}
 		}
 		private ArrayList<String> getNextFloor() throws mException
 		{
-			if (indexInList == flr.get(pagenow).size() - 1) {
-				if (pagenow < pagemax) {
+			if (indexInList == flr.get(pagenow).size() - 1)
+			{
+				if (pagenow < pagemax)
+				{
 					return getReturn(getNextPage());
-				} else {
+				}
+				else
+				{
 					getMax();
-					if (pagenow < pagemax) {
+					if (pagenow < pagemax)
+					{
 						return getNextFloor();
-					} else {
+					}
+					else
+					{
 						throw new mException("获取下一页失败", "超出范围");
 					}
 				}
-			} else {
+			}
+			else
+			{
 				indexInList ++;
 				return getReturn(flr.get(pagenow).get(indexInList));
 			}
 		}
 		private ArrayList<String> getNextPage() throws mException
 		{
-			if (pagenow < pagemax) {
+			if (pagenow < pagemax)
+			{
 				pagenow ++;
 				return getReturn(jumpPage(pagenow));
-			} else {
+			}
+			else
+			{
 				getMax();
-				if (pagenow < pagemax) {
+				if (pagenow < pagemax)
+				{
 					return getNextPage();
-				} else {
+				}
+				else
+				{
 					throw new mException("获取下一页失败", "获取下一页失败, page=" + pagenow + ", pagemax=" + pagemax);
 				}
 			}
 		}
 		private ArrayList<String> jumpFloor(int floor) throws mException
 		{
-				if (floor > floornow) {
-					ArrayList<ArrayMap<String, String>> page;
-					ArrayMap<String, String> flmap;
-					//遍历page
-					for(int p = pagenow; p <= pagemax; p++){
-						if(flr.containsKey(p) == false){
-							getPage("", tid, p);
-						}
-						page = flr.get(p);
-						//遍历楼层
-						for(int i = page.size() - 1; i > -1; i--){
-							flmap = page.get(i);
-							if(Integer.valueOf(flmap.get("floor")) >= floor){
-								return getReturn(flmap);
-							}
+			if (floor > floornow)
+			{
+				ArrayList<ArrayMap<String, String>> page;
+				ArrayMap<String, String> flmap;
+				//遍历page
+				for (int p = pagenow; p <= pagemax; p++)
+				{
+					if (flr.containsKey(p) == false)
+					{
+						getPage("", tid, p);
+					}
+					page = flr.get(p);
+					//遍历楼层
+					for (int i = page.size() - 1; i > -1; i--)
+					{
+						flmap = page.get(i);
+						if (Integer.valueOf(flmap.get("floor")) >= floor)
+						{
+							return getReturn(flmap);
 						}
 					}
-					throw new mException("没有找到该楼层", "");
-				} else if (floor < floornow) {
-					ArrayList<ArrayMap<String, String>> page;
-					ArrayMap<String, String> flmap;
-					//遍历page
-					for(int p = pagenow; p > 0; p--){
-						if(flr.containsKey(p) == false){
-							getPage("", tid, p);
-						}
-						page = flr.get(p);
-						//遍历楼层
-						for(int i = 0; i < page.size(); i++){
-							flmap = page.get(i);
-							if(Integer.valueOf(flmap.get("floor")) <= floor){
-								return getReturn(flmap);
-							}
-						}
-					}
-					throw new mException("没有找到该楼层", "");
-				} else {
-					return getReturn(flr.get(pagenow).get(indexInList));
 				}
+				throw new mException("没有找到该楼层", "");
+			}
+			else if (floor < floornow)
+			{
+				ArrayList<ArrayMap<String, String>> page;
+				ArrayMap<String, String> flmap;
+				//遍历page
+				for (int p = pagenow; p > 0; p--)
+				{
+					if (flr.containsKey(p) == false)
+					{
+						getPage("", tid, p);
+					}
+					page = flr.get(p);
+					//遍历楼层
+					for (int i = 0; i < page.size(); i++)
+					{
+						flmap = page.get(i);
+						if (Integer.valueOf(flmap.get("floor")) <= floor)
+						{
+							return getReturn(flmap);
+						}
+					}
+				}
+				throw new mException("没有找到该楼层", "");
+			}
+			else
+			{
+				return getReturn(flr.get(pagenow).get(indexInList));
+			}
 		}
 		private ArrayList<String> jumpPage(int page) throws mException 
 		{
 			indexInList = 0;
 			getPage("", tid, page, false);
-			if (flr.containsKey(pagenow) == true) {
+			if (flr.containsKey(pagenow) == true)
+			{
 				return getReturn(flr.get(pagenow).get(0));
-			} else {
+			}
+			else
+			{
 				throw new mException("楼层不存在", "jumppage时楼层不存在, page=" + page);
 			}
 		}
@@ -420,15 +494,19 @@ public class Tools
 
 			String thing = httpService.post(url, data);
 			JSONObject list;
-			try {
+			try
+			{
 				list = new JSONObject(thing);
-			} catch (JSONException e) {
+			}
+			catch (JSONException e)
+			{
 				throw new mException("JSON解析好像遇到问题了", "主题列表JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
 			}
 			//return list.optJSONArray("thread_list");
 			return null;
 		}
-		private void getPage(String cookie, String tid, int pn) throws mException{
+		private void getPage(String cookie, String tid, int pn) throws mException
+		{
 			getPage(cookie, tid, pn, false);
 		}
 		private void getPage(String cookie, String tid, int pn, boolean daoxu) throws mException
@@ -438,9 +516,12 @@ public class Tools
 			data += "&_client_id=" + getStamp();
 			data += "&_client_type=2&_client_version=8.8.8.3";
 			data += "&kz=" + tid;
-			if (daoxu == true) {
+			if (daoxu == true)
+			{
 				data += "&last=1&r=1";
-			} else {
+			}
+			else
+			{
 				data += "&pn=" + pn;
 			}
 			data += "&sign=" + sign(data);
@@ -448,19 +529,25 @@ public class Tools
 			String thing = httpService.post(url, data);
 
 			JSONObject page;
-			try {
+			try
+			{
 				page = new JSONObject(thing);
-			} catch (JSONException e) {
+			}
+			catch (JSONException e)
+			{
 				throw new mException("JSON解析好像遇到问题了", "获取帖子JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
 			}
 			pagemax = Integer.valueOf(page.optJSONObject("page").optString("total_page", String.valueOf(pagemax)));
-			if (daoxu == false) {
+			if (daoxu == false)
+			{
 				pagenow = Integer.valueOf(page.optJSONObject("page").optString("current_page", String.valueOf(pagenow)));
 			}
-			if(pagenow > pagemax){
+			if (pagenow > pagemax)
+			{
 				pagenow = pagemax;
 			}
-			if (anaPerson(page.optJSONArray("user_list")) == false) {
+			if (anaPerson(page.optJSONArray("user_list")) == false)
+			{
 				throw new mException("解析page的user_list错误");
 			}
 			anaPage(page.optJSONArray("post_list"), tid, pagenow);
@@ -481,30 +568,36 @@ public class Tools
 			String thing = httpService.post(url, data);
 
 			JSONObject lzl;
-			try {
+			try
+			{
 				lzl = new JSONObject(thing);
-			} catch (JSONException e) {
+			}
+			catch (JSONException e)
+			{
 				throw new mException("JSON解析好像遇到问题了", "获取楼中楼JSON解析错误, Str:“" + thing + "”, 错误信息:" + e.toString());
 			}
 			analzl(lzl.optJSONArray("subpost_list"), tid, pid);
 
 			//如果没有到底就继续
 			int pmax = Integer.valueOf(lzl.optJSONObject("page").optString("total_page"));
-			if (pn < pmax) {
+			if (pn < pmax)
+			{
 				getlzl("", tid, pid, pn + 1);
 			}
 		}
 		private void anaPage(JSONArray list, String tid, int page) throws mException
 		{
 			int len = list.length();
-			if (len < 1) {
+			if (len < 1)
+			{
 				return ;
 			}
 			ArrayList<ArrayMap<String, String>> floorlist = new ArrayList<ArrayMap<String, String>>();
 			JSONObject fl;
 			ArrayMap<String, String> epg;
 			ArrayMap<String, String> nflr;
-			for (int i = 0;i < len; i++) {
+			for (int i = 0;i < len; i++)
+			{
 				fl = list.optJSONObject(i);
 				nflr = new ArrayMap<String, String>();
 				//nflr.putAll(mflr);
@@ -525,14 +618,16 @@ public class Tools
 		private void analzl(JSONArray list, String tid, String pid) throws mException
 		{
 			int len = list.length();
-			if (len < 1) {
+			if (len < 1)
+			{
 				return ;
 			}
 			ArrayList<ArrayMap<String, String>> lzllist = new ArrayList<ArrayMap<String, String>>();
 			JSONObject fl;
 			ArrayMap<String, String> epg;
 			ArrayMap<String, String> nlzl;
-			for (int i = 0;i < len; i++) {
+			for (int i = 0;i < len; i++)
+			{
 				fl = list.optJSONObject(i);
 				nlzl = new ArrayMap<String, String>();
 				nlzl.put("tid", tid);
@@ -551,13 +646,15 @@ public class Tools
 		private boolean anaPerson(JSONArray list)
 		{
 			int len = list.length();
-			if (len < 1) {
+			if (len < 1)
+			{
 				return false;
 			}
 			ArrayMap<String, ArrayMap<String, String>> pslist = new ArrayMap<String, ArrayMap<String, String>>();
 			JSONObject eps;
 			ArrayMap<String, String> mps;
-			for (int i = 0;i < len; i++) {
+			for (int i = 0;i < len; i++)
+			{
 				eps = list.optJSONObject(i);
 				mps = new ArrayMap<String, String>();
 				mps.put("aid", eps.optString("id", ""));
@@ -566,16 +663,20 @@ public class Tools
 				mps.put("level", eps.optString("level_id", "[未获取到用户等级]"));
 				pslist.put(mps.get("aid").toString(), new ArrayMap<String, String>(mps));
 			}
-			if (pslist.size() == list.length()) {
+			if (pslist.size() == list.length())
+			{
 				ps.putAll(pslist);
 				return true;
-			} else {
+			}
+			else
+			{
 				return false;
 			}
 		}
 		private ArrayMap<String, String> anaPerson(JSONObject eps)
 		{
-			if (eps == null) {
+			if (eps == null)
+			{
 				return null;
 			}
 			ArrayMap<String, String> mps = new ArrayMap<String, String>();
@@ -601,7 +702,8 @@ public class Tools
 
 			ArrayList<ArrayMap<String, String>> lzl = this.lzl.get(floor.get("pid"));
 			int len = 0;
-			if (lzl != null) {
+			if (lzl != null)
+			{
 				len = lzl.size();
 			}
 			ArrayList<String> pr = new ArrayList<String>();
@@ -611,7 +713,8 @@ public class Tools
 			content += floor.get("content") + "<br><br><div style=\"float:right;\">------" + floor.get("floor") + "楼  " + floor.get("time") + "</div><br>";
 			content += "<hr>";
 
-			for (int i = 0; i < len; i++) {
+			for (int i = 0; i < len; i++)
+			{
 				elzl = lzl.get(i);
 				content += "<a href=\"http://tieba.baidu.com/home/main/?un=" + elzl.get("id") + "\">" + elzl.get("nickname") + "</a>: " + elzl.get("content") + "<br><div style=\"float:right;\">------" + elzl.get("time") + "</div><br>";
 				pr.add(elzl.get("id"));
@@ -624,11 +727,13 @@ public class Tools
 		private String anaContent(JSONArray content) throws mException
 		{
 			int len = content.length();
-			if (len < 1) {
+			if (len < 1)
+			{
 				return null;
 			}
 			String text = "";
-			for (int i = 0; i < len; i++) {
+			for (int i = 0; i < len; i++)
+			{
 				text += anaContentToHtml(content.optJSONObject(i));
 			}
 			return text;
@@ -637,55 +742,82 @@ public class Tools
 		{
 			String type = content.optString("type", "0");
 			String thing = "";
-			if (type.equals("0")) {
+			if (type.equals("0"))
+			{
 				//thing += (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
 				thing = content.optString("text", "[文本获取失败]");
-			} else if (type.equals("1")) {
+			}
+			else if (type.equals("1"))
+			{
 				//{"type":1,"link":"网址","text":"网址"}
 				//thing += "#链接=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"] + "#";
 				thing = "<a href=\"" + content.optString("link", "") + "\">" + content.optString("text", "") + "</a>";
 				//控制台_输出(0, "#链接# " + (String)内容源码["post_list"][内容计数]["content"][文本计数]["link"]);
-			} else if (type.equals("2")) {
+			}
+			else if (type.equals("2"))
+			{
 				//{"type": "2","text": "image_emoticon33","c": "喷"}
 				//thing += "#表情=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["c"] + "#";
 				thing = "[贴吧表情:" + content.optString("c") + "]";
-			} else if (type.equals("3")) {
+			}
+			else if (type.equals("3"))
+			{
 				//{"type":3,"src":"链接","bsize":"189,199","size":"49634"}
 				//Console.WriteLine((String)内容源码["post_list"][内容计数]["content"].ToString());
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["origin_src"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 				thing = "<img src=\"" + content.optString("origin_src") + "\" alt=\"图片加载失败，请反馈至1021263881@qq.com\" >";
-			} else if (type.equals("4")) {
+			}
+			else if (type.equals("4"))
+			{
 				//thing += "#艾特=" + 内容源码["post_list"][内容计数]["content"][文本计数]["text"].ToString().Replace("@", "") + "#";
 				thing += "<a href=\"http://tieba.baidu.com/home/main/?un=" + UrlEncodeUtf_8(content.optString("text", "").replace("@", "")) + "\">" + content.optString("text", "") + "</a>";
-			} else if (type.equals("5")) {
+			}
+			else if (type.equals("5"))
+			{
 				//{"type":5,"e_type":15,"width":"480","height":"480","bsize":"480,480","during_time":"2","origin_size":"168046","text":"http:\/\/tieba.baidu.com\/mo\/q\/movideo\/page?thumbnail=d109b3de9c82d158d3fcee1d880a19d8bc3e421b&video=10363_ed294eae88371575b3dbcf9f1990f68d","link":"http:\/\/tb-video.bdstatic.com\/tieba-smallvideo\/10363_ed294eae88371575b3dbcf9f1990f68d.mp4","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/d109b3de9c82d158d3fcee1d880a19d8bc3e421b.jpg","is_native_app":0,"native_app":[]}
 				//thing += "#视频#";
-			} else if (type.equals("7")) {
+			}
+			else if (type.equals("7"))
+			{
 				//{"type":"7","text":"\n"}
 				thing = "<br>";
-			} else if (type.equals("9")) {
+			}
+			else if (type.equals("9"))
+			{
 				//{"type":"9","text":"6666666","phonetype":"2"}
 				//thing += (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"];
 				thing = content.optString("text", "");
-			} else if (type.equals("10")) {
+			}
+			else if (type.equals("10"))
+			{
 				//{"type":"10","during_time":"15000","voice_md5":"e25ef2db5076f825e229c6cdb1613f38_1064475243"}
 				//thing += "#语音=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["voice_md5"] + "," + (String)内容源码["post_list"][内容计数]["content"][文本计数]["during_time"] + "#";
-			} else if (type.equals("11")) {
+			}
+			else if (type.equals("11"))
+			{
 				//{"type":"11","c":"白发魔女传之明月天国_女屌丝","static":"png静态图链接","dynamic":"gif动态图链接","height":"160","width":"160","icon":"http://tb2.bdstatic.com/tb/editor/images/faceshop/1058_baifa/panel.png","packet_name":"白发魔女传之明月天国"}
 				//thing += "#表情=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["c"] + "#";
-			} else if (type.equals("16")) {
+			}
+			else if (type.equals("16"))
+			{
 				//{"type":"16","bsize":"560,560","graffiti_info":{"url":"jpg网页端原图","gid":"123456"},"cdn_src":"客户端缩略图","big_cdn_src":"客户端大图"}
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["graffiti_info"]["url"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 				thing = "<img src=\"" + content.optJSONObject("graffiti_info").optString("url") + "alt=\"图片加载失败，请反馈至1021263881@qq.com\" >";
-			} else if (type.equals("17")) {
+			}
+			else if (type.equals("17"))
+			{
 				//{"type":"17","high_together":{"album_id":"478448408116821906","album_name":"关于众筹西游记歌曲演唱会活动","start_time":"0","end_time":"0","location":"","num_join":"0","pic_urls":[]}}
 				//thing += "#活动=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["album_name"] + "#";
-			} else if (type.equals("18")) {
+			}
+			else if (type.equals("18"))
+			{
 				//{"type":"18","text":"#白狐狸不改国庆礼包就滚出dnf#","link":"http://tieba.baidu.com/mo/q/hotMessage?topic_id=0&topic_name=白狐狸不改国庆礼包就滚出dnf"}
 				//thing += "#热议=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["text"] + "#";
-			} else if (type.equals("20")) {
+			}
+			else if (type.equals("20"))
+			{
 				//{"type":"20","src":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","bsize":"375,348","meme_info":{"pck_id":"0","pic_id":"47098639564","width":"375","height":"348","pic_url":"http:\/\/imgsrc.baidu.com\/forum\/pic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","thumbnail":"http:\/\/imgsrc.baidu.com\/forum\/abpic\/item\/4c086e061d950a7bce3c370300d162d9f3d3c9e8.jpg","detail_link":"http:\/\/tieba.baidu.com\/n\/interact\/emoticon\/0\/47098639564?frompb=1"}}
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["src"] + "=MD5=" + tlib.取网络资源MD5((String)内容源码["post_list"][内容计数]["content"][文本计数]["src"]) + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
 				//thing += "#图片=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["src"] + "=size=" + (String)内容源码["post_list"][内容计数]["content"][文本计数]["bsize"] + "#";
@@ -705,14 +837,20 @@ public class Tools
 			executor.submit(futureTask);
 			executor.shutdown();
 			String re = "";
-			try {
+			try
+			{
 				re = futureTask.get();
-			} catch (InterruptedException e) {
-				throw new mException("好像遇到了些奇怪的错误汪~", "Get出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
-			} catch (ExecutionException e) {
+			}
+			catch (InterruptedException e)
+			{
 				throw new mException("好像遇到了些奇怪的错误汪~", "Get出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
 			}
-			if (re == "" || re == null) {
+			catch (ExecutionException e)
+			{
+				throw new mException("好像遇到了些奇怪的错误汪~", "Get出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
+			}
+			if (re == "" || re == null)
+			{
 				throw new mException("网络好像出了点问题喵~", "Get无接收，URL“" + Url + "”，Data:“" + data + "”");
 			}
 			return re;
@@ -726,14 +864,20 @@ public class Tools
 			executor.submit(futureTask);
 			executor.shutdown();
 			String re = "";
-			try {
+			try
+			{
 				re = futureTask.get();
-			} catch (InterruptedException e) {
-				throw new mException("好像遇到了些奇怪的错误汪~", "Post出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
-			} catch (ExecutionException e) {
+			}
+			catch (InterruptedException e)
+			{
 				throw new mException("好像遇到了些奇怪的错误汪~", "Post出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
 			}
-			if (re == "" || re == null) {
+			catch (ExecutionException e)
+			{
+				throw new mException("好像遇到了些奇怪的错误汪~", "Post出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
+			}
+			if (re == "" || re == null)
+			{
 				throw new mException("网络好像出了点问题喵~", "Post无接收，URL“" + Url + "”，Data:“" + data + "”");
 			}
 			return re;
@@ -752,7 +896,8 @@ public class Tools
 			@Override
 			public String call() throws IOException
 			{
-				switch (method) {
+				switch (method)
+				{
 					case "GET":
 						return Get(Url, data);
 					case "POST":
@@ -769,7 +914,8 @@ public class Tools
 			data = URLEncoder.encode(data, "utf-8");
 
 			// 新建一个URL对象
-			if (data != "" && data != null) {
+			if (data != "" && data != null)
+			{
 				Url += "?" + data;
 			}
 			URL url = new URL(Url);
@@ -801,11 +947,14 @@ public class Tools
 
 			// 判断请求是否成功
 			String result;
-			if (urlConn.getResponseCode() == 200) {
+			if (urlConn.getResponseCode() == 200)
+			{
 				// 获取返回的数据
 				result = streamToString(urlConn.getInputStream());
 				//Log.e(TAG, "Get方式请求成功，result--->" + result);
-			} else {
+			}
+			else
+			{
 				result = null;
 				//Log.e(TAG, "Get方式请求失败");
 			}
@@ -928,7 +1077,8 @@ public class Tools
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			byte[] buffer = new byte[1024];
 			int len = 0;
-			while ((len = is.read(buffer)) != -1) {
+			while ((len = is.read(buffer)) != -1)
+			{
 				baos.write(buffer, 0, len);
 			}
 			baos.close();
@@ -937,13 +1087,43 @@ public class Tools
 			return new String(byteArray);
 		}
 	}
-	public class mAdapter extends BaseAdapter{
+	public class mAdapter extends BaseAdapter
+	{
 		private ArrayList<ArrayMap<String, String>> list;
 		private Context context;
 
-		mAdapter(Context context, ArrayList<ArrayMap<String, String>> list){
+		mAdapter(Context context, ArrayList<ArrayMap<String, String>> list)
+		{
 			this.context = context;
 			this.list = list;
+		}
+
+		@Override
+		public int getCount()
+		{
+			// TODO: Implement this method
+			return 0;
+		}
+
+		@Override
+		public Object getItem(int p1)
+		{
+			// TODO: Implement this method
+			return null;
+		}
+
+		@Override
+		public long getItemId(int p1)
+		{
+			// TODO: Implement this method
+			return 0;
+		}
+
+		@Override
+		public View getView(int p1, View p2, ViewGroup p3)
+		{
+			// TODO: Implement this method
+			return null;
 		}
 	}
 }
