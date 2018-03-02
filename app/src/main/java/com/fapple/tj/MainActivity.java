@@ -325,6 +325,40 @@ public class MainActivity extends Activity
 		mlist = (ListView)findViewById(R.id.mainList);
 
 	}
+	
+	class mAdapter extends BaseAdapter
+	{
+
+		@Override
+		public int getCount()
+		{
+			// TODO: Implement this method
+			return 0;
+		}
+
+		@Override
+		public Object getItem(int p1)
+		{
+			// TODO: Implement this method
+			return null;
+		}
+
+		@Override
+		public long getItemId(int p1)
+		{
+			// TODO: Implement this method
+			return 0;
+		}
+
+		@Override
+		public View getView(int p1, View p2, ViewGroup p3)
+		{
+			// TODO: Implement this method
+			return null;
+		}
+
+		
+	}
 
 	//统计
 	private Boolean updatePerson(int did, String id, String nickname)
