@@ -21,7 +21,7 @@
 		android:gravity="left|center"
 		android:ems="7"
 		android:textSize="14sp"
-		android:id="@+id/personNiCheng"
+		android:id="@+id/personnickname"
 		android:paddingLeft="10dp"/>
 
 	<Button

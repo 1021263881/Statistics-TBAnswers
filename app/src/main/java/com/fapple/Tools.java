@@ -338,7 +338,7 @@ public class Tools
 			return floornow;
 		}
 
-		private ArrayList<String> getLastFloor() throws mException
+		public ArrayList<String> getLastFloor() throws mException
 		{
 			if (indexInList == 0)
 			{
@@ -360,13 +360,13 @@ public class Tools
 				return getReturn(flr.get(pagenow).get(indexInList));
 			}
 		}
-		private ArrayList<String> getNextFloor() throws mException
+		public ArrayList<String> getNextFloor() throws mException
 		{
 			if (indexInList == flr.get(pagenow).size() - 1)
 			{
 				if (pagenow < pagemax)
 				{
-					return getReturn(getNextPage());
+					return getNextPage();
 				}
 				else
 				{
@@ -392,7 +392,7 @@ public class Tools
 			if (pagenow < pagemax)
 			{
 				pagenow ++;
-				return getReturn(jumpPage(pagenow));
+				return jumpPage(pagenow);
 			}
 			else
 			{
@@ -407,7 +407,7 @@ public class Tools
 				}
 			}
 		}
-		private ArrayList<String> jumpFloor(int floor) throws mException
+		public ArrayList<String> jumpFloor(int floor) throws mException
 		{
 			if (floor > floornow)
 			{
@@ -462,7 +462,7 @@ public class Tools
 				return getReturn(flr.get(pagenow).get(indexInList));
 			}
 		}
-		private ArrayList<String> jumpPage(int page) throws mException 
+		public ArrayList<String> jumpPage(int page) throws mException 
 		{
 			indexInList = 0;
 			getPage("", tid, page, false);
@@ -1085,45 +1085,6 @@ public class Tools
 			is.close();
 			byte[] byteArray = baos.toByteArray();
 			return new String(byteArray);
-		}
-	}
-	public class mAdapter extends BaseAdapter
-	{
-		private ArrayList<ArrayMap<String, String>> list;
-		private Context context;
-
-		mAdapter(Context context, ArrayList<ArrayMap<String, String>> list)
-		{
-			this.context = context;
-			this.list = list;
-		}
-
-		@Override
-		public int getCount()
-		{
-			// TODO: Implement this method
-			return 0;
-		}
-
-		@Override
-		public Object getItem(int p1)
-		{
-			// TODO: Implement this method
-			return null;
-		}
-
-		@Override
-		public long getItemId(int p1)
-		{
-			// TODO: Implement this method
-			return 0;
-		}
-
-		@Override
-		public View getView(int p1, View p2, ViewGroup p3)
-		{
-			// TODO: Implement this method
-			return null;
 		}
 	}
 }

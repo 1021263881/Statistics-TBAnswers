@@ -2,6 +2,7 @@ package com.fapple.tj;
 
 import android.app.*;
 import android.content.*;
+import android.graphics.*;
 import android.graphics.drawable.*;
 import android.os.*;
 import android.util.*;
@@ -14,7 +15,6 @@ import android.widget.RelativeLayout.*;
 import com.fapple.*;
 import java.util.*;
 import java.util.concurrent.*;
-import android.widget.*;
 
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -326,28 +326,62 @@ public class MainActivity extends Activity
 
 	}
 	
+	/*--------------------------------Private--------------------------*/
+	
+	AsyncTask<String,Void,Bitmap> asyncTask = new AsyncTask<String, Void, Bitmap>() {
+
+		/**
+		 * 即将要执行耗时任务时回调，这里可以做一些初始化操作
+		 */
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+		}
+
+		/**
+		 * 在后台执行耗时操作，其返回值将作为onPostExecute方法的参数
+		 * @param params
+		 * @return
+		 */
+		@Override
+		protected Bitmap doInBackground(String... params) {
+			Bitmap bitmap = null;
+			return bitmap;
+		}
+
+		/**
+		 * 当这个异步任务执行完成后，也就是doInBackground（）方法完成后，
+		 * 其方法的返回结果就是这里的参数
+		 * @param bitmap
+		 */
+		@Override
+		protected void onPostExecute(Bitmap bitmap) {
+			
+		}
+	};
+	asyncTask.execute("");
+	
 	class mAdapter extends BaseAdapter
 	{
-
+		ArrayList<ArrayMap<String, String>> list = new ArrayList<ArrayMap<String, String>>();
+		
+		//返回项数
 		@Override
 		public int getCount()
 		{
-			// TODO: Implement this method
-			return 0;
+			return list.size();
 		}
 
 		@Override
 		public Object getItem(int p1)
 		{
-			// TODO: Implement this method
-			return null;
+			return list.get(p1);
 		}
 
 		@Override
 		public long getItemId(int p1)
 		{
-			// TODO: Implement this method
-			return 0;
+			return p1;
 		}
 
 		@Override
@@ -429,7 +463,7 @@ public class MainActivity extends Activity
 
 			//设置id, 昵称
 			((TextView)person.findViewById(R.id.personid)).setText(personlist.get(i));
-			((TextView)person.findViewById(R.id.personNiCheng)).setText(personlist.get(i + 1));
+			((TextView)person.findViewById(R.id.personnickname)).setText(personlist.get(i + 1));
 
 			//设置按钮监听
 			person.findViewById(R.id.personbutton).setBackground(none);

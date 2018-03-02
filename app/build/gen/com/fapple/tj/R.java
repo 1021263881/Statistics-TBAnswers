@@ -44,9 +44,9 @@ public final class R {
         public static final int mainList=0x7f07000f;
         public static final int mainScrollView=0x7f070010;
         public static final int mainWebView=0x7f07000e;
-        public static final int personNiCheng=0x7f070013;
         public static final int personbutton=0x7f070014;
         public static final int personid=0x7f070012;
+        public static final int personnickname=0x7f070013;
     }
     public static final class layout {
         public static final int actionbar=0x7f030000;
