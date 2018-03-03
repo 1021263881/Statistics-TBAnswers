@@ -2,7 +2,6 @@ package com.fapple.tj;
 
 import android.app.*;
 import android.content.*;
-import android.graphics.*;
 import android.graphics.drawable.*;
 import android.os.*;
 import android.util.*;
@@ -12,19 +11,18 @@ import android.view.inputmethod.*;
 import android.webkit.*;
 import android.widget.*;
 import android.widget.RelativeLayout.*;
-import com.fapple.*;
+import com.fapple.Tools.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnLongClickListener;
+import java.io.*;
+import org.json.*;
 
 public class MainActivity extends Activity 
 {
-	private Tools tool = new Tools();
-	//private Tools.HttpService httpservice = tool.new HttpService();
-	private Tools.TB tb = tool.new TB(this, "4592800021");
+	private TB tb = new TB(this, "4592800021");
 	private ClipboardManager cm = null;
 	private ProgressDialog pd = null;
 	private LinearLayout.LayoutParams personlp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -66,6 +64,7 @@ public class MainActivity extends Activity
 	private int floornow = 1;
 
 	private int hasCopy = 0;
+	private boolean opened = true;
 
 	private ArrayMap<String, ArrayMap<String, String>> tj = new ArrayMap<String, ArrayMap<String, String>>();
 	private ArrayMap<String, String> ntj = new ArrayMap<String, String>();
@@ -75,6 +74,14 @@ public class MainActivity extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+		//从/data/data载入统计缓存
+		try {
+			gettjFromFile();
+		} catch (mException e) {
+			showWarning("", e.getMessage(), e.getClass().getName(), true);
+
+		}
 
 		//获取剪贴板
 		cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -130,11 +137,7 @@ public class MainActivity extends Activity
 				@Override
 				public void onClick(View p1)
 				{
-					try {
-						ana(tb.getLastFloor());
-					} catch (mException e) {
-
-					}
+					lastFloor();
 				}
 			});
 
@@ -144,11 +147,7 @@ public class MainActivity extends Activity
 				@Override
 				public void onClick(View p1)
 				{
-					try {
-						ana(tb.getNextFloor());
-					} catch (mException e) {
-
-					}
+					nextFloor();
 				}
 			});
 
@@ -243,21 +242,14 @@ public class MainActivity extends Activity
 							public void onClick(DialogInterface p1, int p2)
 							{
 								if (jumppagebutton.isChecked() == true) {
-									showWait("跳转中");
-									double dpage = Integer.valueOf(jumppageedit.getText().toString());
-									int page;
-									if(dpage < pagemax + 200 && dpage > 0){
-										page = Integer.valueOf(dpage);
-									}
-									tb.jumpFloor(page);
+									int page = Integer.valueOf(jumppageedit.getText().toString());
+									jumpPage(page);
 								} else if (jumpfloorbutton.isChecked() == true) {
-									showWait("跳转中");
-									double dfloor = Integer.valueOf(jumpflooredit.getText().toString());
-									int floor;
-									if(dfloor < floormax + 10 && dfloor > 0){
-										floor = Integer.valueOf(dfloor);
+									int floor = Integer.valueOf(jumpflooredit.getText().toString());
+									if (Math.abs(floor - floornow) > 300) {
+										Toast.makeText(MainActivity.this, "跳转楼层数过长，请耐心等候", 1).show();
 									}
-									tb.jumpPage(floor);
+									jumpFloor(floor);
 								} else {
 									showtips("跳转失败", "你倒是选一个跳转方式啊", "oj8k");
 								}
@@ -266,9 +258,6 @@ public class MainActivity extends Activity
 
 					//获取Alert
 					mdialog = mdialogb.show();
-
-					//tool.copyToClipBoard(cm, aa);
-					//tool.loadHtmlInWebview(web, aa);
 				}
 			});
 
@@ -277,39 +266,42 @@ public class MainActivity extends Activity
 				@Override
 				public boolean onLongClick(View p1)
 				{
-					Toast.makeText(MainActivity.this, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
-					hasCopy = 1;
+					Intent intent = new Intent(MainActivity.this, Showtj.class);
+					intent.putExtra("tj", get
 					return true;
 				}
 			});
 
 		//加载温馨提示
-		String tipstitle = getResources().getString(R.string.tips_title);
-		String tipsmess = getResources().getString(R.string.tips_message);
-		AlertDialog.Builder tips = new AlertDialog.Builder(MainActivity.this);
-		tips.setTitle(tipstitle);
-		tips.setMessage(tipsmess);
-		tips.setNegativeButton("ojbk", new DialogInterface.OnClickListener(){
-				@Override
-				public void onClick(DialogInterface p1, int p2)
-				{
-					// TODO: Implement this method
-				}
-			});
-		tips.setOnDismissListener(new DialogInterface.OnDismissListener(){
-				@Override
-				public void onDismiss(DialogInterface p1)
-				{
-					freshmax();
-				}
-			});
-		tips.show();
-
+		if (opened == false) {
+			String tipstitle = getResources().getString(R.string.tips_title);
+			String tipsmess = getResources().getString(R.string.tips_message);
+			AlertDialog.Builder tips = new AlertDialog.Builder(MainActivity.this);
+			tips.setTitle(tipstitle);
+			tips.setMessage(tipsmess);
+			tips.setNegativeButton("ojbk", new DialogInterface.OnClickListener(){
+					@Override
+					public void onClick(DialogInterface p1, int p2)
+					{
+						// TODO: Implement this method
+					}
+				});
+			tips.setOnDismissListener(new DialogInterface.OnDismissListener(){
+					@Override
+					public void onDismiss(DialogInterface p1)
+					{
+						freshmax();
+						jumpFloor(1);
+					}
+				});
+			tips.show();
+		}else{
+			freshmax();
+			jumpFloor(1);
+		}
+		
 		//获取WebView
 		web = (WebView)findViewById(R.id.mainWebView);
-
-		// 设置可以支持缩放 
-		//web.getSettings().setSupportZoom(true);
 
 		web.getSettings().setUseWideViewPort(true);
 
@@ -325,92 +317,98 @@ public class MainActivity extends Activity
 		mlist = (ListView)findViewById(R.id.mainList);
 
 	}
-	
-	/*--------------------------------Private--------------------------*/
-	
-	AsyncTask<String,Void,Bitmap> asyncTask = new AsyncTask<String, Void, Bitmap>() {
 
-		/**
-		 * 即将要执行耗时任务时回调，这里可以做一些初始化操作
-		 */
-		@Override
-		protected void onPreExecute() {
-			showWait("加载中...");
-			super.onPreExecute();
-		}
-
-		/**
-		 * 在后台执行耗时操作，其返回值将作为onPostExecute方法的参数
-		 * @param params
-		 * @return
-		 */
-		@Override
-		protected Bitmap doInBackground(String... params) {
-			Bitmap bitmap = null;
-			return bitmap;
-		}
-
-		/**
-		 * 当这个异步任务执行完成后，也就是doInBackground（）方法完成后，
-		 * 其方法的返回结果就是这里的参数
-		 * @param bitmap
-		 */
-		@Override
-		protected void onPostExecute(Bitmap bitmap) {
-			
-		}
-	};
-	asyncTask.execute("");
-	
-	class lzlAdapter extends BaseAdapter
+	@Override
+	protected void onPause()
 	{
-		ArrayList<ArrayMap<String, String>> list = new ArrayList<ArrayMap<String, String>>();
-		Context context;
-		
-		//返回项数
-		@Override
-		public int getCount()
-		{
-			return list.size();
+		//销毁程序前保存未导出的数据
+		try {
+			autoSavetj();
+			save("setting.json", "");
+		} catch (mException e) {
+
 		}
+		super.onPause();
+	}
 
-		@Override
-		public Object getItem(int p1)
-		{
-			return list.get(p1);
+	//自动检查保存统计数据
+	private void autoSavetj() throws mException
+	{
+		if (hasCopy == 0) {
+			save("tj.json", getJsontjFromList());
+		} else {
+
 		}
+	}
 
-		@Override
-		public long getItemId(int p1)
-		{
-			return p1;
+	private void gettjFromFile() throws mException
+	{
+		String content = "";
+
+		content = load("tj.json");
+		if (content == "" || content == null) {
+			return ;
 		}
-
-		@Override
-		public View getView(int p1, View p2, ViewGroup p3)
-		{
-			ViewHolder viewholder;
-
-			//判断view是否为空
-			if(p2 == null)
-			{
-				viewholder = new ViewHolder();
-				p2 = LayoutInflater.from(context).inflate(R.layout.lzl, null);
-
-				p2.setTag(viewholder);
-			}else{
-				viewholder = (ViewHolder)p2.getTag();
+		JSONArray tjlist;
+		try {
+			tjlist = new JSONArray(content);
+		} catch (JSONException e) {
+			throw new mException("", e.toString());
+		}
+		String id = "";
+		String nickname = "";
+		int yx = -1;
+		int gzl = -1;
+		ArrayMap<String, String> meps;
+		JSONObject eps;
+		int len = tjlist.length();
+		for (int i = 0; i < len; i++) {
+			try {
+				eps = (JSONObject)tjlist.get(i);
+				id = (String)eps.get("id");
+				nickname = (String)eps.get("nickname");
+				yx = eps.get("yx");
+				gzl = eps.get("gzl");
+			} catch (JSONException e) {
+				throw new mException("", e.toString());
 			}
-			return p2;
+			meps = new ArrayMap<String, String>();
+			meps.put("nickname", nickname);
+			meps.put("yx", String.valueOf(yx));
+			meps.put("gzl", String.valueOf(gzl));
+			tj.put(id, meps);
 		}
+	}
 
-		class ViewHolder
-		{
-			ImageView head;
-			TextView id;
-			TextView date;
-			TextView content;
+	//获取字符串格式的统计表
+	private String getJsontjFromList() throws mException
+	{
+		int len = tj.size();
+		String id = "";
+		String nickname = "";
+		int yx = -1;
+		int gzl = -1;
+		ArrayMap meps;
+		JSONArray ps = new JSONArray();
+		JSONObject jeps;
+		for (int i = 0; i < len; i++) {
+			jeps = new JSONObject();
+			id = tj.keyAt(i);
+			meps = tj.get(id);
+			nickname = (String)meps.get("nickname");
+			yx = meps.get("yx");
+			gzl = meps.get("gzl");
+			try {
+				jeps.put("id", id);
+				jeps.put("nickname", nickname);
+				jeps.put("yx", yx);
+				jeps.put("gzl", gzl);
+			} catch (JSONException e) {
+				throw new mException("", e.toString());
+			}
+			ps.put(jeps);
 		}
+		return ps.toString();
 	}
 
 	//统计
@@ -468,6 +466,11 @@ public class MainActivity extends Activity
 		return false;
 	}
 
+	//清空统计结果
+	public void cleentj(){
+		tj.removeAll(tj.values());
+	}
+	
 	//更新名单
 	public Boolean updatePersonList(ArrayList<String> personlist)
 	{
@@ -497,10 +500,12 @@ public class MainActivity extends Activity
 			return false;
 		}
 	}
+
+	//分析TBreturn
 	private void ana(ArrayList<String> list) throws mException
 	{
 		showWait("加载中...");
-		if (list.size() < 5) {
+		if (list == null || list.size() < 5) {
 			throw new mException("传值过少", "ana错误, ana.size=" + list.size());
 		}
 		pagenow = Integer.valueOf(list.get(0));
@@ -510,7 +515,7 @@ public class MainActivity extends Activity
 
 		midtext.setText(pagenow + "/" + pagemax + "页 " + floornow + "/" + floormax + "楼");
 
-		tool.loadHtmlInWebview(web, list.get(4));
+		Tool.loadHtmlInWebview(web, list.get(4));
 
 		int len = list.size();
 		ArrayList<String> pr = new ArrayList<String>();
@@ -526,10 +531,250 @@ public class MainActivity extends Activity
 		updatePersonList(pr);
 		killWait();
 	}
-	public void freshmax(int pagemax, int floormax){
+
+	private String load(String path) throws mException
+	{
+		String content = "";
+		FileInputStream input = null;
+		try {
+			input = openFileInput(path);
+		} catch (FileNotFoundException e) {
+			if (e.getClass().getName().equals("java.io.FileNotFoundException")) {
+				try {
+					openFileInput("setting.json");
+				} catch (FileNotFoundException e2) {
+					if (e2.getClass().getName().equals("java.io.FileNotFoundException")) {
+						opened = false;
+						return content;
+					} else {
+						throw new mException("未找到文件(" + path + ")", e.toString());
+					}
+				}
+			} else {
+				throw new mException("未找到文件(" + path + ")", e.toString());
+			}
+		}
+		try {
+			content = Tool.streamToString(input);
+			input.close();
+		} catch (IOException e) {
+			throw new mException("", e.toString());
+		}
+		return content;
+	}
+
+	private void save(String path, String content) throws mException
+	{
+		try {
+			FileOutputStream output = openFileOutput(path, Context.MODE_PRIVATE);
+			/**
+			 * Context.MODE_PRIVATE = 0
+			 * 为默认操作模式，代表该文件是私有数据，只能被应用本身访问，在该模式下，写入的内容会覆盖原文件的内容。
+			 * Context.MODE_APPEND = 32768
+			 * 该模式会检查文件是否存在，存在就往文件追加内容，否则就创建新文件。　
+			 * Context.MODE_WORLD_READABLE = 1
+			 * 表示当前文件可以被其他应用读取。
+			 * MODE_WORLD_WRITEABLE
+			 * 表示当前文件可以被其他应用写入。
+			 */
+
+			output.write(content.getBytes());
+			output.close();
+		} catch (IOException e) {
+			throw new mException("", e.toString());
+		}
+	}
+
+	/*--------------------------------跳转--------------------------*/
+
+	private void nextFloor()
+	{
+		fAsyncTask asyncTask = new fAsyncTask();
+		asyncTask.execute("nf");
+	}
+
+	private void lastFloor()
+	{
+		fAsyncTask asyncTask = new fAsyncTask();
+		asyncTask.execute("lf");
+	}
+
+	private void jumpFloor(int floor)
+	{
+		fAsyncTask asyncTask = new fAsyncTask();
+		asyncTask.execute("jf", String.valueOf(floor));
+	}
+
+	private void jumpPage(int page)
+	{
+		fAsyncTask asyncTask = new fAsyncTask();
+		asyncTask.execute("jp", String.valueOf(page));
+	}
+
+	class fAsyncTask extends AsyncTask<String, Void, ArrayList<String>>
+	{
+		int error = 0;
+		mException e;
+		/**
+		 * 即将要执行耗时任务时回调，这里可以做一些初始化操作
+		 * 在主线程执行
+		 */
+		@Override
+		protected void onPreExecute()
+		{
+			showWait("跳转中...");
+			super.onPreExecute();
+		}
+
+		/**
+		 * 在后台执行耗时操作，其返回值将作为onPostExecute方法的参数
+		 * 在单独线程执行
+		 */
+		@Override
+		protected ArrayList<String> doInBackground(String... params)
+		{
+			String met = params[0];
+			if (met.equals("nf")) {
+				try {
+					return tb.getNextFloor();
+				} catch (mException e) {
+					error = 1;
+					this.e = e;
+					return null;
+				}
+			} else if (met.equals("lf")) {
+				try {
+					return tb.getLastFloor();
+				} catch (mException e) {
+					error = 1;
+					this.e = e;
+					return null;
+				}
+			} else if (met.equals("jf")) {
+				try {
+					return tb.jumpFloor(Integer.valueOf(params[1]));
+				} catch (NumberFormatException e) {
+
+				} catch (mException e) {
+					error = 1;
+					this.e = e;
+					return null;
+				}
+			} else if (met.equals("jp")) {
+				try {
+					return tb.jumpPage(Integer.valueOf(params[1]));
+				} catch (NumberFormatException e) {
+
+				} catch (mException e) {
+					error = 1;
+					this.e = e;
+					return null;
+				}
+			}
+			//输出阶段性结果
+			//publishProgress("");
+			return null;
+		}
+
+		/**
+		 *阶段性成果
+		 */
+        protected void onProgressUpdate(Object... values)
+		{
+
+        }
+
+		/**
+		 * 当这个异步任务执行完成后，也就是doInBackground（）方法完成后，
+		 * 其方法的返回结果就是这里的参数
+		 * 在主线程执行
+		 */
+		@Override
+		protected void onPostExecute(ArrayList<String> list)
+		{
+			if (error == 1) {
+				showWarning("", e.getMessage(), e.getMore(), true);
+			}
+			try {
+				ana(list);
+			} catch (mException e) {
+				showWarning("", e.getMessage(), e.getMore(), true);
+			}
+		}
+	}
+
+	/*------------------------------自定义Adapter------------------------*/
+	class lzlAdapter extends BaseAdapter
+	{
+		ArrayList<ArrayMap<String, String>> list = new ArrayList<ArrayMap<String, String>>();
+		Context context;
+
+		//返回项数
+		@Override
+		public int getCount()
+		{
+			return list.size();
+		}
+
+		@Override
+		public Object getItem(int p1)
+		{
+			return list.get(p1);
+		}
+
+		@Override
+		public long getItemId(int p1)
+		{
+			return p1;
+		}
+
+		@Override
+		public View getView(int p1, View p2, ViewGroup p3)
+		{
+			ViewHolder viewholder;
+
+			//判断view是否为空
+			if (p2 == null) {
+				viewholder = new ViewHolder();
+				p2 = LayoutInflater.from(context).inflate(R.layout.lzl, null);
+
+				LinearLayout l1 = (LinearLayout)p2.findViewById(R.id.lzlL1);
+				viewholder.head = (ImageView)l1.findViewById(R.id.lzlIcon);
+
+				LinearLayout l2 = (LinearLayout)l1.findViewById(R.id.lzlL2);
+				viewholder.id = (TextView)l2.findViewById(R.id.lzlID);
+				viewholder.date = (TextView)l2.findViewById(R.id.lzlDate);
+
+				viewholder.content = (TextView)p2.findViewById(R.id.lzlContent);
+
+				p2.setTag(viewholder);
+			} else {
+				viewholder = (ViewHolder)p2.getTag();
+			}
+
+			ArrayMap plzl = list.get(p1);
+
+			viewholder.id.setText(plzl.get("id").toString() + "[" + plzl.get("nickname").toString() + "]");
+			viewholder.date.setText(plzl.get("time"));
+			viewholder.content.setText(plzl.get("content"));
+
+			return p2;
+		}
+
+		class ViewHolder
+		{
+			ImageView head;
+			TextView id;
+			TextView date;
+			TextView content;
+		}
+	}
+
+	public void freshmax(int pagemax, int floormax)
+	{
 		this.pagemax = pagemax;
 		this.floormax = floormax;
-		
+
 		String te = "";
 		te += pagenow;
 		te += "/";
@@ -553,6 +798,7 @@ public class MainActivity extends Activity
 				showWarning("", e.getMessage(), e.getMore(), false);
 			} 
 			if (ma != null) {
+				pagemax = ma.get(0);
 				floormax = ma.get(1);
 			}
 		}
@@ -582,7 +828,6 @@ public class MainActivity extends Activity
 				@Override
 				public void onClick(DialogInterface p1, int p2)
 				{
-					// TODO: Implement this method
 				}
 			});
 		tips.setOnDismissListener(new DialogInterface.OnDismissListener(){
@@ -607,7 +852,7 @@ public class MainActivity extends Activity
 				@Override
 				public void onClick(DialogInterface p1, int p2)
 				{
-					tool.copyToClipBoard(cm, more);
+					Tool.copyToClipBoard(cm, more);
 				}
 			});
 		warn.show();
@@ -616,10 +861,8 @@ public class MainActivity extends Activity
 	{
 		if (pd != null) {
 			pd.setMessage(message);
-		}else{
-			throw new mException("等待提示框更新出错", "ProgressDialogMessage更新错误");
 		}
-		
+
 		//等待框，下面是对应的关闭函数
 		if (pd == null) {
 			pd = new ProgressDialog(MainActivity.this);
@@ -629,7 +872,6 @@ public class MainActivity extends Activity
 			pd.setCancelable(false);//false不能取消显示，true可以取消显示
 			pd.show();
 		}
-		return true;
 	}
 	public void killWait()
 	{

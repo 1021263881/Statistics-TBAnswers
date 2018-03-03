@@ -1,4 +1,4 @@
-package com.fapple;
+package com.fapple.Tools;
 
 import android.content.*;
 import android.text.*;
@@ -18,7 +18,7 @@ import org.json.*;
 import android.text.ClipboardManager;
 import android.view.*;
 
-public class Tools
+public class Tool
 {
 	public static void loadHtmlInWebview(WebView webview, String Html)
 	{
@@ -68,7 +68,7 @@ public class Tools
 	}
 
 	//产生一个新的随机数，传参随意位数
-	public String newNumber(int num)
+	public static String newNumber(int num)
 	{
 		num --;
 		Random rnd = new Random();
@@ -83,19 +83,15 @@ public class Tools
 	public static String getMD5(String content) throws mException
 	{
 		MessageDigest digest;
-		try
-		{
+		try {
 			digest = MessageDigest.getInstance("MD5");
-		}
-		catch (NoSuchAlgorithmException e)
-		{
+		} catch (NoSuchAlgorithmException e) {
 			throw new mException("取MD5出错了喵~", "取MD5错误，编码前文本:“" + content + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
 		}
 		digest.update(content.getBytes());
 
 		StringBuilder builder = new StringBuilder();
-		for (byte b : digest.digest())
-		{
+		for (byte b : digest.digest()) {
 			builder.append(Integer.toHexString((b >> 4) & 0xf));
 			builder.append(Integer.toHexString(b & 0xf));
 		}
@@ -130,6 +126,18 @@ public class Tools
 		return re_StrTime;
 	}
 
-	
+	public static String streamToString(InputStream is)throws IOException
+	{
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int len = 0;
+		while ((len = is.read(buffer)) != -1) {
+			baos.write(buffer, 0, len);
+		}
+		baos.close();
+		is.close();
+		byte[] byteArray = baos.toByteArray();
+		return new String(byteArray);
+	}
 }
 

@@ -1,4 +1,4 @@
-package com.fapple;
+package com.fapple.Tools;
 
 public class mException extends Exception
 {
@@ -19,11 +19,13 @@ public class mException extends Exception
 	{
 		super(cause);
 	}
-	public mException(String message, String more){
+	public mException(String message, String more)
+	{
 		super(message);
 		this.more = more;
 	}
-	public String getMore(){
+	public String getMore()
+	{
 		return more;
 	}
 }

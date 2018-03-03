@@ -6,29 +6,35 @@
 	android:orientation="horizontal"
 	android:gravity="center">
 
-	<Button
-		android:layout_height="24dp"
-		android:layout_width="24dp"
-		android:id="@+id/actionbarlast"
-		android:background="@drawable/lastbutton"
-		android:layout_marginRight="18dp"/>
-
-	<TextView
+	<RelativeLayout
 		android:layout_height="wrap_content"
-		android:layout_width="wrap_content"
-		android:text="1/1页 1/1楼"
-		android:lines="1"
-		android:gravity="center"
-		android:textSize="20sp"
-		android:id="@+id/actionbarmidtext"
-		android:ems="9"/>
+		android:layout_width="match_parent">
 
-	<Button
-		android:layout_height="24dp"
-		android:layout_width="24dp"
-		android:id="@+id/actionbarnext"
-		android:background="@drawable/nextbutton"
-		android:layout_marginLeft="18dp"/>
+		<Button
+			android:layout_height="24dp"
+			android:layout_width="24dp"
+			android:id="@+id/actionbarlast"
+			android:background="@drawable/lastbutton"
+			android:layout_alignParentLeft="true"/>
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:text="1/1页 1/1楼"
+			android:lines="1"
+			android:gravity="center"
+			android:textSize="18sp"
+			android:id="@+id/actionbarmidtext"
+			android:layout_centerInParent="true"/>
+
+		<Button
+			android:layout_height="24dp"
+			android:layout_width="24dp"
+			android:id="@+id/actionbarnext"
+			android:background="@drawable/nextbutton"
+			android:layout_alignParentRight="true"/>
+
+	</RelativeLayout>
 
 </LinearLayout>
 
