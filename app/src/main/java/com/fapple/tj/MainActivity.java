@@ -362,9 +362,10 @@ public class MainActivity extends Activity
 	};
 	asyncTask.execute("");
 	
-	class mAdapter extends BaseAdapter
+	class lzlAdapter extends BaseAdapter
 	{
 		ArrayList<ArrayMap<String, String>> list = new ArrayList<ArrayMap<String, String>>();
+		Context context;
 		
 		//返回项数
 		@Override
@@ -388,11 +389,28 @@ public class MainActivity extends Activity
 		@Override
 		public View getView(int p1, View p2, ViewGroup p3)
 		{
-			// TODO: Implement this method
-			return null;
+			ViewHolder viewholder;
+
+			//判断view是否为空
+			if(p2 == null)
+			{
+				viewholder = new ViewHolder();
+				p2 = LayoutInflater.from(context).inflate(R.layout.lzl, null);
+
+				p2.setTag(viewholder);
+			}else{
+				viewholder = (ViewHolder)p2.getTag();
+			}
+			return p2;
 		}
 
-		
+		class ViewHolder
+		{
+			ImageView head;
+			TextView id;
+			TextView date;
+			TextView content;
+		}
 	}
 
 	//统计
@@ -596,53 +614,28 @@ public class MainActivity extends Activity
 	}
 	public void showWait(String message)
 	{
-		ExecutorService executor = Executors.newCachedThreadPool();
-		Task task = new Task(message);
-		FutureTask<Boolean> futureTask = new FutureTask<Boolean>(task);
-		executor.submit(futureTask);
-		executor.shutdown();
-		
-		try {
-			futureTask.get();
-		} catch (InterruptedException e) {
-			
-		} catch (ExecutionException e) {
-			
+		if (pd != null) {
+			pd.setMessage(message);
+		}else{
+			throw new mException("等待提示框更新出错", "ProgressDialogMessage更新错误");
 		}
+		
+		//等待框，下面是对应的关闭函数
+		if (pd == null) {
+			pd = new ProgressDialog(MainActivity.this);
+			pd.setIndeterminate(false);//循环滚动
+			pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+			pd.setMessage(message);
+			pd.setCancelable(false);//false不能取消显示，true可以取消显示
+			pd.show();
+		}
+		return true;
 	}
 	public void killWait()
 	{
 		if (pd != null) {
 			pd.dismiss();
 			pd = null;
-		}
-	}
-	class Task implements Callable<Boolean>
-	{
-		private String message;
-		Task(String message)
-		{
-			this.message = message;
-		}
-		@Override
-		public Boolean call() throws mException
-		{
-			if (pd != null) {
-				pd.setMessage(message);
-			}else{
-				throw new mException("", "");
-			}
-			
-			//等待框，下面是对应的关闭函数
-			if (pd == null) {
-				pd = new ProgressDialog(MainActivity.this);
-				pd.setIndeterminate(false);//循环滚动
-				pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-				pd.setMessage(message);
-				pd.setCancelable(false);//false不能取消显示，true可以取消显示
-				pd.show();
-			}
-			return true;
 		}
 	}
 }

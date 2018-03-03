@@ -135,78 +135,37 @@ public class HttpService
 			urlConn.disconnect();
 			return result;
 		}
-		/*
+		
 		 private String Post(String Url, String data)throws  UnsupportedEncodingException, IOException
 		 {
-		 //string转URL(utf-8)编码
-		 //产生UnsupportedEncodingException
-		 data = URLEncoder.encode(data, "utf-8");
-
-		 // 请求的参数转换为byte数组
-		 byte[] postData = data.getBytes();
-
-		 // 新建一个URL对象
-		 URL url = new URL(Url);
-
-		 // 打开一个HttpURLConnection连接
-		 HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
-
-		 // 设置连接超时时间
-		 urlConn.setConnectTimeout(5 * 1000);
-
-		 //设置从主机读取数据超时
-		 urlConn.setReadTimeout(5 * 1000);
-
-		 // Post请求必须设置允许输出 默认false
-		 urlConn.setDoOutput(true);
-
-		 //设置请求允许输入 默认是true
-		 urlConn.setDoInput(true);
-
-		 // Post请求不能使用缓存
-		 urlConn.setUseCaches(false);
-
-		 // 设置为Post请求
-		 urlConn.setRequestMethod("POST");
-
-		 //设置本次连接是否自动处理重定向
-		 urlConn.setInstanceFollowRedirects(true);
-
-		 // 配置请求Content-Type
-		 urlConn.setRequestProperty("Content-Type", "application/json");
-
-		 //设置请求体的类型是文本类型
-		 urlConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
-		 //设置请求体的长度
-		 urlConn.setRequestProperty("Content-Length", String.valueOf(postData.length));
-
-		 // 开始连接
-		 urlConn.connect();
-
-		 // 发送请求参数
-		 DataOutputStream dos = new DataOutputStream(urlConn.getOutputStream());
-		 dos.write(postData);
-		 dos.flush();
-		 dos.close();
-
-		 // 判断请求是否成功
-		 String result;
-		 if (urlConn.getResponseCode() == 200) {
-		 // 获取返回的数据
-		 result = streamToString(urlConn.getInputStream());
-		 //Log.e(TAG, "Post方式请求成功，result--->" + result);
-		 } else {
-		 result = null;
-		 //Log.e(TAG, "Post方式请求失败");
-		 }
-		 // 关闭连接
-		 urlConn.disconnect();
-
-		 return result;
-		 //Log.e(TAG, e.toString());
-		 }
-		 */
+			//用POST发送键值对数据
+			url = new URL("http://192.168.31.200:8080/HttpServer/MyServlet");
+                    conn = (HttpURLConnection) url.openConnection();
+                    //通过setRequestMethod将conn设置成POST方法
+                    conn.setRequestMethod("POST");
+                    //调用conn.setDoOutput()方法以显式开启请求体
+                    conn.setDoOutput(true);
+                    //用setRequestProperty方法设置一个自定义的请求头:action，由于后端判断
+                    conn.setRequestProperty("action", NETWORK_POST_KEY_VALUE);
+                    //获取请求头
+                    requestHeader = getReqeustHeader(conn);
+                    //获取conn的输出流
+                    OutputStream os = conn.getOutputStream();
+                    //获取两个键值对name=孙群和age=27的字节数组，将该字节数组作为请求体
+                    requestBody = new String("name=孙群&age=27").getBytes("UTF-8");
+                    //将请求体写入到conn的输出流中
+                    os.write(requestBody);
+                    //记得调用输出流的flush方法
+                    os.flush();
+                    //关闭输出流
+                    os.close();
+                    //当调用getInputStream方法时才真正将请求体数据上传至服务器
+                    InputStream is = conn.getInputStream();
+                    //获得响应体的字节数组
+                    responseBody = getBytesByInputStream(is);
+                    //获得响应头
+					responseHeader = getResponseHeader(conn);
+		}
 		private String Post_(String path, String Info) throws IOException
 		{ 
 
