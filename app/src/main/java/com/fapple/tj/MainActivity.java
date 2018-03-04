@@ -860,8 +860,6 @@ public class MainActivity extends Activity
 					ana(list);
 				} catch (mException e) {
 					showWarning("", e.getMessage(), e.getMore(), true);
-				}finally{
-					killWait();
 				}
 			}
 		}
