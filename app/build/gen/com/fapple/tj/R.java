@@ -50,6 +50,7 @@ public final class R {
         public static final int personnickname=0x7f070014;
         public static final int showtjclearbutton=0x7f070016;
         public static final int showtjcopybutton=0x7f070017;
+        public static final int showtjlst=0x7f070018;
     }
     public static final class layout {
         public static final int actionbar=0x7f030000;

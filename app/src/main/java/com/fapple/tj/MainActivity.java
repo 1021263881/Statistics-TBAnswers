@@ -78,6 +78,9 @@ public class MainActivity extends Activity
 		//从/data/data载入统计缓存
 		try {
 			gettjFromFile();
+			if(tj.size() != 0){
+				Toast.makeText(this, "已恢复上次未清空的统计数据", 0).show();
+			}
 		} catch (mException e) {
 			showWarning("", e.getMessage(), e.getClass().getName(), true);
 
@@ -267,7 +270,12 @@ public class MainActivity extends Activity
 				public boolean onLongClick(View p1)
 				{
 					Intent intent = new Intent(MainActivity.this, Showtj.class);
-					intent.putExtra("tj", get
+					try {
+						intent.putExtra("tj", getJsontjFromList());
+						startActivityForResult(intent, 0);
+					} catch (mException e) {
+						showWarning("", e.getMessage(), e.getMore(), true);
+					}
 					return true;
 				}
 			});
@@ -330,7 +338,25 @@ public class MainActivity extends Activity
 		}
 		super.onPause();
 	}
-
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(requestCode == 0){
+			switch(resultCode){
+				case 0:/*无操作*/
+					Toast.makeText(this, "记得导出数据哦", 0).show();
+					break;
+				case 1:/*已导出*/
+					break;
+				case -1:/*清空*/
+					cleentj();
+					break;
+			}
+		}
+		//super.onActivityResult(requestCode, resultCode, data);
+	}
+	
 	//自动检查保存统计数据
 	private void autoSavetj() throws mException
 	{
