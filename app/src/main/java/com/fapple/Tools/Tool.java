@@ -23,7 +23,7 @@ public class Tool
 	public static void loadHtmlInWebview(WebView webview, String Html)
 	{
 		String thing = "<html><header>" + getCSS() + "</header><body>" + Html + "</body></html>";
-		webview.loadData(thing, "text/html", "UTF-8");
+		webview.loadData(thing, "text/html; charset=UTF-8", null);
 	}
 
 	//自适应CSS

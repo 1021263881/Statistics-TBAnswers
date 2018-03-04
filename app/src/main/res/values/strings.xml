@@ -4,5 +4,5 @@
     <string name="app_name">统计工具</string>
     <string name="tips_title">来自102的温馨提示:</string>
 	<string name="tips_message">这是一个粗制滥造的APP\n没有自动保存之类的东西\n所以请在退出前导出数据\n单击标题栏中间进行跳转\n长按导出数据到剪贴板\n最后祝您\n身体健康\n谢谢੭ ᐕ)੭*⁾⁾</string>
-    <string name="update">1.0.0 增加跳转提示\n修复跳转页码显示错误的bug</string>
+    <string name="update">1.0.1\n增加统计数据导出\n修复跳转bug\n修复部分机型显示乱码错误\n增加等待框\n\n\n1.0.0\n增加跳转提示\n修复跳转页码显示错误的bug</string>
 </resources>
