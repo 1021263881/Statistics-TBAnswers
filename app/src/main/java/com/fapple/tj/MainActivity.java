@@ -40,14 +40,14 @@ public class MainActivity extends Activity
 	private AlertDialog mdialog;
 
 	//获取按钮
-	RadioButton jumppagebutton;
-	RadioButton jumpfloorbutton;
+	private RadioButton jumppagebutton;
+	private RadioButton jumpfloorbutton;
 
 	//获取文本框
-	EditText jumppageedit;
-	TextView jumppagetext;
-	EditText jumpflooredit;
-	TextView jumpfloortext;
+	private EditText jumppageedit;
+	private TextView jumppagetext;
+	private EditText jumpflooredit;
+	private TextView jumpfloortext;
 
 	//仨背景
 	private Drawable ojbk;
@@ -78,7 +78,7 @@ public class MainActivity extends Activity
 		//从/data/data载入统计缓存
 		try {
 			gettjFromFile();
-			if(tj.size() != 0){
+			if (tj.size() != 0) {
 				Toast.makeText(this, "已恢复上次未清空的统计数据", 0).show();
 			}
 		} catch (mException e) {
@@ -303,11 +303,11 @@ public class MainActivity extends Activity
 					}
 				});
 			tips.show();
-		}else{
+		} else {
 			freshmax();
 			jumpFloor(1);
 		}
-		
+
 		//获取WebView
 		web = (WebView)findViewById(R.id.mainWebView);
 
@@ -338,25 +338,53 @@ public class MainActivity extends Activity
 		}
 		super.onPause();
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		if(requestCode == 0){
-			switch(resultCode){
+		if (requestCode == 0) {
+			switch (resultCode) {
 				case 0:/*无操作*/
 					Toast.makeText(this, "记得导出数据哦", 0).show();
 					break;
-				case 1:/*已导出*/
+				case 1:/*导出*/
+					copytj();
+					Toast.makeText(this, "已复制统计数据，记得清空哦~", 0).show();
 					break;
 				case -1:/*清空*/
 					cleentj();
+					Toast.makeText(this, "已清空统计数据", 0).show();
 					break;
 			}
 		}
 		//super.onActivityResult(requestCode, resultCode, data);
 	}
-	
+
+	//复制统计数据至剪贴板
+	private void copytj()
+	{
+		String content = "";
+
+		int len = tj.size();
+		String id;
+		String nickname;
+		int yx;
+		int gzl;
+		ArrayMap<String, String> meps;
+		for (int i = 0; i < len; i++) {
+			id = tj.keyAt(i);
+			meps = tj.get(id);
+			nickname = meps.get("nickname");
+			yx = Integer.valueOf(meps.get("yx"));
+			gzl = Integer.valueOf(meps.get("gzl"));
+
+			content += id + "\t" + nickname + "\t" + yx + "\t" + gzl;
+			content += "\n";
+		}
+
+		Tool.copyToClipBoard(cm, content);
+	}
+
 	//自动检查保存统计数据
 	private void autoSavetj() throws mException
 	{
@@ -422,8 +450,8 @@ public class MainActivity extends Activity
 			id = tj.keyAt(i);
 			meps = tj.get(id);
 			nickname = (String)meps.get("nickname");
-			yx = meps.get("yx");
-			gzl = meps.get("gzl");
+			yx = Integer.valueOf(meps.get("yx").toString());
+			gzl = Integer.valueOf(meps.get("gzl").toString());
 			try {
 				jeps.put("id", id);
 				jeps.put("nickname", nickname);
@@ -493,10 +521,11 @@ public class MainActivity extends Activity
 	}
 
 	//清空统计结果
-	public void cleentj(){
-		tj.removeAll(tj.values());
+	public void cleentj()
+	{
+		tj.clear();
 	}
-	
+
 	//更新名单
 	public Boolean updatePersonList(ArrayList<String> personlist)
 	{

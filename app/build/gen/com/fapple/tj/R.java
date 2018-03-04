@@ -51,6 +51,8 @@ public final class R {
         public static final int showtjclearbutton=0x7f070016;
         public static final int showtjcopybutton=0x7f070017;
         public static final int showtjlst=0x7f070018;
+        public static final int showtjmessageid=0x7f070019;
+        public static final int showtjmessagenum=0x7f07001a;
     }
     public static final class layout {
         public static final int actionbar=0x7f030000;
@@ -59,6 +61,7 @@ public final class R {
         public static final int main=0x7f030003;
         public static final int person=0x7f030004;
         public static final int showtj=0x7f030005;
+        public static final int showtjmessage=0x7f030006;
     }
     public static final class string {
         public static final int app_name=0x7f050000;
