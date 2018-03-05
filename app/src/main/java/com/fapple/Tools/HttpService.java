@@ -17,12 +17,12 @@ public class HttpService
 		try {
 			re = futureTask.get();
 		} catch (InterruptedException e) {
-			throw new mException("好像遇到了些奇怪的错误汪~", "Get出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
+			throw new mException("好像遇到了些奇怪的错误汪~", "Get出错，错误信息:\n" + e.toString());
 		} catch (ExecutionException e) {
-			throw new mException("好像遇到了些奇怪的错误汪~", "Get出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
+			throw new mException("好像遇到了些奇怪的错误汪~", "Get出错，错误信息:\n" + e.toString());
 		}
 		if (re == "" || re == null) {
-			throw new mException("网络好像出了点问题喵~", "Get无接收，URL“" + Url + "”，Data:“" + data + "”");
+			throw new mException("网络好像出了点问题喵~", "Get无接收");
 		}
 		return re;
 	}
@@ -38,12 +38,12 @@ public class HttpService
 		try {
 			re = futureTask.get();
 		} catch (InterruptedException e) {
-			throw new mException("好像遇到了些奇怪的错误汪~", "Post出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
+			throw new mException("好像遇到了些奇怪的错误汪~", "Post出错，错误信息:\n" + e.toString());
 		} catch (ExecutionException e) {
-			throw new mException("好像遇到了些奇怪的错误汪~", "Post出错，URL“" + Url + "”，Data:“" + data + "”\n错误信息:" + e.toString() + "\n" + e.getMessage());
+			throw new mException("好像遇到了些奇怪的错误汪~", "Post出错，错误信息:\n" + e.toString());
 		}
 		if (re == "" || re == null) {
-			throw new mException("网络好像出了点问题喵~", "Post无接收，URL“" + Url + "”，Data:“" + data + "”");
+			throw new mException("网络好像出了点问题喵~", "Post无接收");
 		}
 		return re;
 	}

@@ -79,26 +79,8 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-		//从/data/data载入统计缓存
-		try {
-			gettjFromFile();
-			if (tj.size() != 0) {
-				Toast.makeText(this, "已恢复上次未清空的统计数据", 0).show();
-			}
-		} catch (mException e) {
-			showWarning("", e.getMessage(), e.getClass().getName(), true);
-
-		}
-
 		//获取剪贴板
 		cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-
-		try {
-			version = APKVersion.getVersionCode(this);
-		} catch (mException e) {
-			showWarning("", e.getMessage(), e.getMore(), true);
-			version = 0;
-		}
 
 		//获取图片
 		ojbk = getResources().getDrawable(R.drawable.ojbk);
@@ -119,17 +101,23 @@ public class MainActivity extends Activity
 				TextView id = (TextView)((View)p1.getParent()).findViewById(R.id.personid);
 				TextView nickname = (TextView)((View)p1.getParent()).findViewById(R.id.personnickname);
 				int did = 0;
-				if (pbuttonback == none) {
+				if (pbuttonback == none)
+				{
 					p1.setBackground(ojbk);
 					did = 1;
-				} else if (pbuttonback == ojbk) {
+				}
+				else if (pbuttonback == ojbk)
+				{
 					p1.setBackground(well);
 					did = 2;
-				} else if (pbuttonback == well) {
+				}
+				else if (pbuttonback == well)
+				{
 					p1.setBackground(none);
 					did = -1;
 				}
-				if (did != 0) {
+				if (did != 0)
+				{
 					updatePerson(did, id.getText().toString(), nickname.getText().toString());
 				}
 			}
@@ -137,7 +125,8 @@ public class MainActivity extends Activity
 
 		//设置ActionBar
 		actionbar = getActionBar();
-		if (actionbar != null) {
+		if (actionbar != null)
+		{
 			actionbar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 			actionbar.setCustomView(R.layout.actionbar);
 		}
@@ -202,7 +191,8 @@ public class MainActivity extends Activity
 							@Override
 							public void onFocusChange(View p1, boolean p2)
 							{
-								if (p2) {
+								if (p2)
+								{
 									//展开软键盘
 									InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);//得到系统的输入方法服务
 									imm.showSoftInput(p1, 0);
@@ -218,7 +208,8 @@ public class MainActivity extends Activity
 							@Override
 							public void onFocusChange(View p1, boolean p2)
 							{
-								if (p2) {
+								if (p2)
+								{
 									//展开软键盘
 									InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);//得到系统的输入方法服务
 									imm.showSoftInput(p1, 0);
@@ -255,16 +246,22 @@ public class MainActivity extends Activity
 							@Override
 							public void onClick(DialogInterface p1, int p2)
 							{
-								if (jumppagebutton.isChecked() == true) {
+								if (jumppagebutton.isChecked() == true)
+								{
 									int page = Integer.valueOf(jumppageedit.getText().toString());
 									jumpPage(page);
-								} else if (jumpfloorbutton.isChecked() == true) {
+								}
+								else if (jumpfloorbutton.isChecked() == true)
+								{
 									int floor = Integer.valueOf(jumpflooredit.getText().toString());
-									if (Math.abs(floor - floornow) > 300) {
+									if (Math.abs(floor - floornow) > 300)
+									{
 										Toast.makeText(MainActivity.this, "跳转楼层数过长，请耐心等候", 1).show();
 									}
 									jumpFloor(floor);
-								} else {
+								}
+								else
+								{
 									showtips("跳转失败", "你倒是选一个跳转方式啊", "oj8k");
 								}
 							}
@@ -281,18 +278,50 @@ public class MainActivity extends Activity
 				public boolean onLongClick(View p1)
 				{
 					Intent intent = new Intent(MainActivity.this, Showtj.class);
-					try {
+					try
+					{
 						intent.putExtra("tj", getJsontjFromList());
 						startActivityForResult(intent, 0);
-					} catch (mException e) {
+					}
+					catch (mException e)
+					{
 						showWarning("", e.getMessage(), e.getMore(), true);
 					}
 					return true;
 				}
 			});
 
+		freshmax();
+		try
+		{
+			loadsetting();
+		}
+		catch (mException e)
+		{
+			showWarning("", e.getMessage(), e.getMore(), true);
+		}
+
+		//获取版本号
+		int version = 0;
+		try
+		{
+			version = APKVersion.getVersionCode(this);
+		}
+		catch (mException e)
+		{
+			showWarning("", e.getMessage(), e.getMore(), true);
+			version = 0;
+		}
+
+		if (version != this.version)
+		{
+			this.version = version;
+			showUpdateMess();
+		}
+
 		//加载温馨提示
-		if (opened == false) {
+		if (opened == false)
+		{
 			opened = true;
 			String tipstitle = getResources().getString(R.string.tips_title);
 			String tipsmess = getResources().getString(R.string.tips_message);
@@ -310,19 +339,15 @@ public class MainActivity extends Activity
 					@Override
 					public void onDismiss(DialogInterface p1)
 					{
-						freshmax();
 						jumpFloor(1);
 					}
 				});
 			tips.show();
-		} else {
-			freshmax();
-			try {
-				loadsetting();
-			} catch (mException e) {
-
-			}
-			if (floornow != 1) {
+		}
+		else
+		{
+			if (floornow != 1)
+			{
 				AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
 				dialog.setMessage("是否恢复到" + pagenow + "页" + floornow + "层");
 				dialog.setCancelable(false);
@@ -344,7 +369,9 @@ public class MainActivity extends Activity
 						}
 					});
 				dialog.show();
-			} else {
+			}
+			else
+			{
 				jumpPage(1);
 			}
 		}
@@ -365,6 +392,38 @@ public class MainActivity extends Activity
 		list = (LinearLayout)findViewById(R.id.mainLinearLayout);
 		mlist = (ListView)findViewById(R.id.mainList);
 
+		//从/data/data载入统计缓存
+		try
+		{
+			gettjFromFile();
+			if (tj.size() != 0)
+			{
+				AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+				dialog.setMessage("检测到本地有统计数据，是否恢复？");
+				dialog.setCancelable(false);
+				dialog.setNegativeButton("确定", new DialogInterface.OnClickListener(){
+
+						@Override
+						public void onClick(DialogInterface p1, int p2)
+						{
+							showToast("已恢复", 0);
+						}
+					});
+				dialog.setNeutralButton("取消", new DialogInterface.OnClickListener(){
+
+						@Override
+						public void onClick(DialogInterface p1, int p2)
+						{
+							cleentj();
+						}
+					});
+				dialog.show();
+			}
+		}
+		catch (mException e)
+		{
+			showWarning("", e.getMessage(), e.getClass().getName(), true);
+		}
 	}
 
 	@Override
@@ -373,9 +432,12 @@ public class MainActivity extends Activity
 		//销毁程序前保存未导出的数据
 		//if (opened == true)
 		{
-			try {
-				autoSavetj();
-			} catch (mException e) {
+			try
+			{
+				autoSave();
+			}
+			catch (mException e)
+			{
 
 			}
 		}
@@ -385,41 +447,48 @@ public class MainActivity extends Activity
 	@Override
 	protected void onResume()
 	{
-		try {
-			loadsetting();
-		} catch (mException e) {
+		/*
+		 try
+		 {
+		 loadsetting();
+		 }
+		 catch (mException e)
+		 {
 
-		}
-		if (floornow != 1) {
-			AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
-			dialog.setMessage("是否恢复到" + pagenow + "页" + floornow + "层");
-			dialog.setCancelable(false);
-			dialog.setNegativeButton("确定", new DialogInterface.OnClickListener(){
+		 }
+		 if (floornow != 1)
+		 {
+		 AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+		 dialog.setMessage("是否恢复到" + pagenow + "页" + floornow + "层");
+		 dialog.setCancelable(false);
+		 dialog.setNegativeButton("确定", new DialogInterface.OnClickListener(){
 
-					@Override
-					public void onClick(DialogInterface p1, int p2)
-					{
-						jumpPage(pagenow);
-						jumpFloor(floornow);
-					}
-				});
-			dialog.setNeutralButton("取消", new DialogInterface.OnClickListener(){
+		 @Override
+		 public void onClick(DialogInterface p1, int p2)
+		 {
+		 jumpPage(pagenow);
+		 jumpFloor(floornow);
+		 }
+		 });
+		 dialog.setNeutralButton("取消", new DialogInterface.OnClickListener(){
 
-					@Override
-					public void onClick(DialogInterface p1, int p2)
-					{
+		 @Override
+		 public void onClick(DialogInterface p1, int p2)
+		 {
 
-					}
-				});
-		}
+		 }
+		 });
+		 }*/
 		super.onResume();
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		if (requestCode == 0) {
-			switch (resultCode) {
+		if (requestCode == 0)
+		{
+			switch (resultCode)
+			{
 				case 0:/*无操作*/
 					Toast.makeText(this, "记得导出数据哦", 0).show();
 					break;
@@ -449,7 +518,8 @@ public class MainActivity extends Activity
 		ArrayMap<String, String> meps;
 		content += "ID" + "\t" + "昵称" + "\t" + "有效回答" + "\t" + "高质量回答";
 		content += "\n";
-		for (int i = 0; i < len; i++) {
+		for (int i = 0; i < len; i++)
+		{
 			id = tj.keyAt(i);
 			meps = tj.get(id);
 			nickname = meps.get("nickname");
@@ -464,7 +534,7 @@ public class MainActivity extends Activity
 	}
 
 	//自动检查保存统计数据
-	private void autoSavetj() throws mException
+	private void autoSave() throws mException
 	{
 		save("tj.json", getJsontjFromList());
 		savesetting();
@@ -475,13 +545,17 @@ public class MainActivity extends Activity
 		String content = "";
 
 		content = load("tj.json");
-		if (content == "" || content == null) {
+		if (content == "" || content == null)
+		{
 			return ;
 		}
 		JSONArray tjlist;
-		try {
+		try
+		{
 			tjlist = new JSONArray(content);
-		} catch (JSONException e) {
+		}
+		catch (JSONException e)
+		{
 			throw new mException("", e.toString());
 		}
 		String id = "";
@@ -491,14 +565,18 @@ public class MainActivity extends Activity
 		ArrayMap<String, String> meps;
 		JSONObject eps;
 		int len = tjlist.length();
-		for (int i = 0; i < len; i++) {
-			try {
+		for (int i = 0; i < len; i++)
+		{
+			try
+			{
 				eps = (JSONObject)tjlist.get(i);
 				id = (String)eps.get("id");
 				nickname = (String)eps.get("nickname");
 				yx = eps.get("yx");
 				gzl = eps.get("gzl");
-			} catch (JSONException e) {
+			}
+			catch (JSONException e)
+			{
 				throw new mException("", e.toString());
 			}
 			meps = new ArrayMap<String, String>();
@@ -520,19 +598,23 @@ public class MainActivity extends Activity
 		ArrayMap meps;
 		JSONArray ps = new JSONArray();
 		JSONObject jeps;
-		for (int i = 0; i < len; i++) {
+		for (int i = 0; i < len; i++)
+		{
 			jeps = new JSONObject();
 			id = tj.keyAt(i);
 			meps = tj.get(id);
 			nickname = (String)meps.get("nickname");
 			yx = Integer.valueOf(meps.get("yx").toString());
 			gzl = Integer.valueOf(meps.get("gzl").toString());
-			try {
+			try
+			{
 				jeps.put("id", id);
 				jeps.put("nickname", nickname);
 				jeps.put("yx", yx);
 				jeps.put("gzl", gzl);
-			} catch (JSONException e) {
+			}
+			catch (JSONException e)
+			{
 				throw new mException("", e.toString());
 			}
 			ps.put(jeps);
@@ -545,49 +627,67 @@ public class MainActivity extends Activity
 	{
 		hasCopy = 0;
 		int old;
-		switch (did) {
+		switch (did)
+		{
 			case 1/*有效*/:
-				if (tj.containsKey(id)) {
-					if (tj.containsKey(id) == true) {
+				if (tj.containsKey(id))
+				{
+					if (tj.containsKey(id) == true)
+					{
 						old = Integer.valueOf(tj.get(id).get("yx"));
 						old ++;
-						if (old == Integer.valueOf(tj.get(id).put("yx", String.valueOf(old)))) {
+						if (old == Integer.valueOf(tj.get(id).put("yx", String.valueOf(old))))
+						{
 							return true;
 						}
 					}
-				} else {
+				}
+				else
+				{
 					tj.put(id, new ArrayMap<String, String>(ntj));
-					if (nickname == tj.get(id).put("nickname", nickname)) {
+					if (nickname == tj.get(id).put("nickname", nickname))
+					{
 						return true;
 					}
 				}
 				break;
 			case 2/*高质量*/:
-				if (tj.containsKey(id)) {
+				if (tj.containsKey(id))
+				{
 					old = Integer.valueOf(tj.get(id).get("gzl"));
 					old ++;
-					if (old == Integer.valueOf(tj.get(id).put("gzl", String.valueOf(old)))) {
+					if (old == Integer.valueOf(tj.get(id).put("gzl", String.valueOf(old))))
+					{
 						return true;
 					}
-				} else {
+				}
+				else
+				{
 					return false;
 				}
 				break;
 			case -1/*无效*/:
-				if (tj.containsKey(id)) {
+				if (tj.containsKey(id))
+				{
 					old = Integer.valueOf(tj.get(id).get("yx"));
 					int oldg = Integer.valueOf(tj.get(id).get("gzl"));
-					if (old == 1) {
+					if (old == 1)
+					{
 						tj.remove(id);
-					} else {
+					}
+					else
+					{
 						old --;
 						oldg --;
 						if (old == Integer.valueOf(tj.get(id).put("yx", String.valueOf(old))) && 
-							oldg == Integer.valueOf(tj.get(id).put("gzl", String.valueOf(oldg)))) {
+							oldg == Integer.valueOf(tj.get(id).put("gzl", String.valueOf(oldg))))
+						{
 							return true;
 						}
 					}
-				} else {
+				}
+				else
+				{
 					return false;
 				}
 				break;
@@ -605,12 +705,14 @@ public class MainActivity extends Activity
 	public Boolean updatePersonList(ArrayList<String> personlist)
 	{
 		//清空内容
-		if (list.getChildCount() != 0) {
+		if (list.getChildCount() != 0)
+		{
 			list.removeAllViews();
 		}
 
 		int ma = personlist.size();
-		for (int i = 0; i < ma; i += 2) {
+		for (int i = 0; i < ma; i += 2)
+		{
 			person = View.inflate(MainActivity.this, R.layout.person, null);
 
 			//设置id, 昵称
@@ -624,9 +726,12 @@ public class MainActivity extends Activity
 			list.addView(person, personlp);
 		}
 
-		if (list.getChildCount() == personlist.size()) {
+		if (list.getChildCount() == personlist.size())
+		{
 			return true;
-		} else {
+		}
+		else
+		{
 			return false;
 		}
 	}
@@ -635,7 +740,8 @@ public class MainActivity extends Activity
 	private void ana(ArrayList<String> list) throws mException
 	{
 		showWait("加载中...");
-		if (list == null || list.size() < 5) {
+		if (list == null || list.size() < 5)
+		{
 			throw new mException("传值过少", "ana错误, ana.size=" + list.size());
 		}
 		pagenow = Integer.valueOf(list.get(0));
@@ -650,9 +756,11 @@ public class MainActivity extends Activity
 		int len = list.size();
 		ArrayList<String> pr = new ArrayList<String>();
 		String name = "";
-		for (int i = 5; i < len; i += 2) {
+		for (int i = 5; i < len; i += 2)
+		{
 			name = list.get(i);
-			if (pr.contains(name) == false) {
+			if (pr.contains(name) == false)
+			{
 				pr.add(name);
 				name = list.get(i + 1);
 				pr.add(name);
@@ -664,7 +772,8 @@ public class MainActivity extends Activity
 
 	private void save(String path, String content) throws mException
 	{
-		try {
+		try
+		{
 			FileOutputStream output = openFileOutput(path, Context.MODE_PRIVATE);
 			/**
 			 * Context.MODE_PRIVATE = 0
@@ -679,19 +788,24 @@ public class MainActivity extends Activity
 
 			output.write(content.getBytes());
 			output.close();
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			throw new mException("", e.toString());
 		}
 	}
 
 	private void savesetting() throws mException
 	{
-		try {
+		try
+		{
 			setting.put("version", version);
 			setting.put("pagenow", pagenow);
 			setting.put("floornow", floornow);
 			save("setting.json", setting.toString());
-		} catch (JSONException e) {
+		}
+		catch (JSONException e)
+		{
 			throw new mException("", e.toString());
 		}
 	}
@@ -700,28 +814,49 @@ public class MainActivity extends Activity
 	{
 		String content = "";
 		FileInputStream input = null;
-		try {
+		try
+		{
 			input = openFileInput(path);
-		} catch (FileNotFoundException e) {
-			if (e.getClass().getName().equals("java.io.FileNotFoundException")) {
-				try {
-					openFileInput("setting.json");
-				} catch (FileNotFoundException e2) {
-					if (e2.getClass().getName().equals("java.io.FileNotFoundException")) {
+		}
+		catch (FileNotFoundException e)
+		{
+			if (e.getClass().getName().equals("java.io.FileNotFoundException"))
+			{
+				try
+				{
+
+					openFileInput("setting.json").close();
+
+				}
+				catch (FileNotFoundException e2)
+				{
+					if (e2.getClass().getName().equals("java.io.FileNotFoundException"))
+					{
 						opened = false;
 						return content;
-					} else {
+					}
+					else
+					{
 						throw new mException("未找到文件(" + path + ")", e.toString());
 					}
 				}
-			} else {
+				catch (IOException e3)
+				{
+					throw new mException("", e.toString());
+				}
+			}
+			else
+			{
 				throw new mException("未找到文件(" + path + ")", e.toString());
 			}
 		}
-		try {
+		try
+		{
 			content = Tool.streamToString(input);
 			input.close();
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			throw new mException("", e.toString());
 		}
 		return content;
@@ -732,16 +867,15 @@ public class MainActivity extends Activity
 		String content;
 		content = load("setting.json");
 		JSONObject msetting = null;
-		int version = 0;
-		try {
+		try
+		{
 			msetting = new JSONObject(content);
+			version = msetting.optInt("version", version);
 			pagenow = msetting.optInt("pagenow", pagenow);
 			floornow = msetting.optInt("floornow", floornow);
-			version = msetting.optInt("version", version);
-			if (version != this.version || version == 0) {
-				showUpdateMess();
-			}
-		} catch (JSONException e) {
+		}
+		catch (JSONException e)
+		{
 			throw new mException("", e.toString());
 		}
 	}
@@ -795,38 +929,61 @@ public class MainActivity extends Activity
 		protected ArrayList<String> doInBackground(String... params)
 		{
 			String met = params[0];
-			if (met.equals("nf")) {
-				try {
+			if (met.equals("nf"))
+			{
+				try
+				{
 					return tb.getNextFloor();
-				} catch (mException e) {
+				}
+				catch (mException e)
+				{
 					error = 1;
 					this.e = e;
 					return null;
 				}
-			} else if (met.equals("lf")) {
-				try {
+			}
+			else if (met.equals("lf"))
+			{
+				try
+				{
 					return tb.getLastFloor();
-				} catch (mException e) {
+				}
+				catch (mException e)
+				{
 					error = 1;
 					this.e = e;
 					return null;
 				}
-			} else if (met.equals("jf")) {
-				try {
+			}
+			else if (met.equals("jf"))
+			{
+				try
+				{
 					return tb.jumpFloor(Integer.valueOf(params[1]));
-				} catch (NumberFormatException e) {
+				}
+				catch (NumberFormatException e)
+				{
 
-				} catch (mException e) {
+				}
+				catch (mException e)
+				{
 					error = 1;
 					this.e = e;
 					return null;
 				}
-			} else if (met.equals("jp")) {
-				try {
+			}
+			else if (met.equals("jp"))
+			{
+				try
+				{
 					return tb.jumpPage(Integer.valueOf(params[1]));
-				} catch (NumberFormatException e) {
+				}
+				catch (NumberFormatException e)
+				{
 
-				} catch (mException e) {
+				}
+				catch (mException e)
+				{
 					error = 1;
 					this.e = e;
 					return null;
@@ -853,12 +1010,18 @@ public class MainActivity extends Activity
 		@Override
 		protected void onPostExecute(ArrayList<String> list)
 		{
-			if (error == 1) {
+			if (error == 1)
+			{
 				showWarning("", e.getMessage(), e.getMore(), true);
-			} else {
-				try {
+			}
+			else
+			{
+				try
+				{
 					ana(list);
-				} catch (mException e) {
+				}
+				catch (mException e)
+				{
 					showWarning("", e.getMessage(), e.getMore(), true);
 				}
 			}
@@ -896,7 +1059,8 @@ public class MainActivity extends Activity
 			ViewHolder viewholder;
 
 			//判断view是否为空
-			if (p2 == null) {
+			if (p2 == null)
+			{
 				viewholder = new ViewHolder();
 				p2 = LayoutInflater.from(context).inflate(R.layout.lzl, null);
 
@@ -910,7 +1074,9 @@ public class MainActivity extends Activity
 				viewholder.content = (TextView)p2.findViewById(R.id.lzlContent);
 
 				p2.setTag(viewholder);
-			} else {
+			}
+			else
+			{
 				viewholder = (ViewHolder)p2.getTag();
 			}
 
@@ -951,15 +1117,20 @@ public class MainActivity extends Activity
 	public void freshmax()
 	{
 		showWait("正在获取信息...");
-		if (floormax == 1) {
+		if (floormax == 1)
+		{
 			ArrayList<Integer> ma;
-			try {
+			try
+			{
 				ma = tb.getMax();
-			} catch (mException e) {
+			}
+			catch (mException e)
+			{
 				ma = null;
 				showWarning("", e.getMessage(), e.getMore(), false);
 			} 
-			if (ma != null) {
+			if (ma != null)
+			{
 				pagemax = ma.get(0);
 				floormax = ma.get(1);
 			}
@@ -1003,7 +1174,8 @@ public class MainActivity extends Activity
 	private void showWarning(String title, String message, final String more, boolean cancelable)
 	{
 		AlertDialog.Builder warn = new AlertDialog.Builder(MainActivity.this);
-		if (title == "" || title == null) {
+		if (title == "" || title == null)
+		{
 			title = "哎呦，好像遇到错误了";
 		}
 		warn.setTitle(title);
@@ -1029,12 +1201,14 @@ public class MainActivity extends Activity
 	}
 	public void showWait(String message)
 	{
-		if (pd != null) {
+		if (pd != null)
+		{
 			pd.setMessage(message);
 		}
 
 		//等待框，下面是对应的关闭函数
-		if (pd == null) {
+		if (pd == null)
+		{
 			pd = new ProgressDialog(MainActivity.this);
 			pd.setIndeterminate(false);//循环滚动
 			pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -1045,7 +1219,8 @@ public class MainActivity extends Activity
 	}
 	public void killWait()
 	{
-		if (pd != null) {
+		if (pd != null)
+		{
 			pd.dismiss();
 			pd = null;
 		}
@@ -1054,6 +1229,14 @@ public class MainActivity extends Activity
 	{
 		String content = getResources().getString(R.string.update);
 		showtips("更新日志", content, "确定");
+	}
+	private void showToast(String content, int len)
+	{
+		if (len > 1 || len < 0)
+		{
+			len = 0;
+		}
+		Toast.makeText(this, content, len).show();
 	}
 }
 
