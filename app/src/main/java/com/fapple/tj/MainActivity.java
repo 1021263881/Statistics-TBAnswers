@@ -22,7 +22,7 @@ import org.json.*;
 
 public class MainActivity extends Activity 
 {
-	private TB tb = new TB(this, "4592800021");
+	private TB tb = new TB(this, "4409677", "4592800021");
 	private ClipboardManager cm = null;
 	private ProgressDialog pd = null;
 	private LinearLayout.LayoutParams personlp = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -318,7 +318,7 @@ public class MainActivity extends Activity
 			this.version = version;
 			showUpdateMess();
 		}
-
+/*
 		//加载温馨提示
 		if (opened == false)
 		{
@@ -375,7 +375,7 @@ public class MainActivity extends Activity
 				jumpPage(1);
 			}
 		}
-
+*/
 		//获取WebView
 		web = (WebView)findViewById(R.id.mainWebView);
 
@@ -392,6 +392,8 @@ public class MainActivity extends Activity
 		list = (LinearLayout)findViewById(R.id.mainLinearLayout);
 		mlist = (ListView)findViewById(R.id.mainList);
 
+		jumpMark("91113770898");
+		/*
 		//从/data/data载入统计缓存
 		try
 		{
@@ -424,6 +426,7 @@ public class MainActivity extends Activity
 		{
 			showWarning("", e.getMessage(), e.getClass().getName(), true);
 		}
+		*/
 	}
 
 	@Override
@@ -906,6 +909,11 @@ public class MainActivity extends Activity
 		asyncTask.execute("jp", String.valueOf(page));
 	}
 
+	private void jumpMark(String pid){
+			fAsyncTask asyncTask = new fAsyncTask();
+			asyncTask.execute("jm", pid);
+	}
+	
 	class fAsyncTask extends AsyncTask<String, Void, ArrayList<String>>
 	{
 		int error = 0;
@@ -977,6 +985,22 @@ public class MainActivity extends Activity
 				try
 				{
 					return tb.jumpPage(Integer.valueOf(params[1]));
+				}
+				catch (NumberFormatException e)
+				{
+
+				}
+				catch (mException e)
+				{
+					error = 1;
+					this.e = e;
+					return null;
+				}
+			}else if (met.equals("jm"))
+			{
+				try
+				{
+					return tb.jumpMark(params[1]);
 				}
 				catch (NumberFormatException e)
 				{

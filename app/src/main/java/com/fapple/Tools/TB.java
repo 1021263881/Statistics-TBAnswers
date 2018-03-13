@@ -14,6 +14,7 @@ public class TB
 	private int floornow = 1;
 	private int indexInList = 0;
 
+	private String frs = "";
 	private String tid = "";
 	private MainActivity main;
 
@@ -28,9 +29,10 @@ public class TB
 
 	HttpService httpService = new HttpService();
 
-	public TB(MainActivity main, String tid)
+	public TB(MainActivity main, String frs, String tid)
 	{
 		this.main = main;
+		this.frs = frs;
 		this.tid = tid;
 
 		//初始化楼层
@@ -173,14 +175,22 @@ public class TB
 		if (floor > floornow) {
 			ArrayList<ArrayMap<String, String>> page;
 			ArrayMap<String, String> flmap;
+			int len = -1;
 			//遍历page
 			for (int p = pagenow; p <= pagemax; p++) {
 				if (pg.containsKey(p) == false) {
 					getPage("", tid, p);
 				}
 				page = pg.get(p);
+				
+				len = page.size();
+				//判断目标楼层是否在该页
+				if (Integer.valueOf(page.get(len - 1).get("floor")) < floor){
+					continue;
+				}
+				
 				//遍历楼层
-				for (int i = 0; i < page.size(); i++) {
+				for (int i = 0; i < len; i++) {
 					flmap = page.get(i);
 					if (Integer.valueOf(flmap.get("floor")) >= floor) {
 						indexInList = i;
@@ -192,12 +202,20 @@ public class TB
 		} else if (floor < floornow) {
 			ArrayList<ArrayMap<String, String>> page;
 			ArrayMap<String, String> flmap;
+			int len = -1;
 			//遍历page
 			for (int p = pagenow; p > 0; p--) {
 				if (pg.containsKey(p) == false) {
 					getPage("", tid, p);
 				}
 				page = pg.get(p);
+
+				len = page.size();
+				//判断目标楼层是否在该页
+				if (Integer.valueOf(page.get(0).get("floor")) > floor){
+					continue;
+				}
+				
 				//遍历楼层
 				for (int i = page.size() - 1; i > -1; i--) {
 					flmap = page.get(i);
@@ -215,14 +233,23 @@ public class TB
 	public ArrayList<String> jumpPage(int page) throws mException 
 	{
 		indexInList = 0;
-		getPage("", tid, page, false);
+		getPage("", tid, page);
 		if (pg.containsKey(pagenow) == true) {
 			return getReturn(pg.get(pagenow).get(0));
 		} else {
 			throw new mException("楼层不存在", "jumppage时楼层不存在, page=" + page);
 		}
 	}
-
+	public ArrayList<String> jumpMark(String pid) throws mException{
+		indexInList = 0;
+		getPage("", tid, pid);
+		if (pg.containsKey(pagenow) == true) {
+			return getReturn(pg.get(pagenow).get(0));
+		} else {
+			throw new mException("楼层不存在", "jumpmark时楼层不存在, pid" + pid);
+		}
+	}
+	
 	/*-------------------------内部处理--------------------------*/
 	//等待维护
 	private JSONArray gettz(String cookie, String tiebaname, int pn, int sorttype) throws mException
@@ -236,7 +263,7 @@ public class TB
 		data += 贴吧名_URL_UTF8;
 		data += "&pn=" + pn;
 		data += "&rn=50";
-		data += "&sort_type=" + sorttype;//回复0发帖1智障3
+		data += "&sort_type=" + sorttype;//回复0发帖1关注2智障3
 		data += "&sign=" + sign(data);
 
 		String thing = httpService.post(url, data);
@@ -249,18 +276,24 @@ public class TB
 		//return list.optJSONArray("thread_list");
 		return null;
 	}
+	private void getPage(String cookie, String tid, String pid) throws mException{
+		getPage("", tid, pid, -1, false);
+	}
 	private void getPage(String cookie, String tid, int pn) throws mException
 	{
-		getPage(cookie, tid, pn, false);
+		getPage(cookie, tid, "-1", pn, false);
 	}
-	private void getPage(String cookie, String tid, int pn, boolean daoxu) throws mException
+	private void getPage(String cookie, String tid, String pid, int pn, boolean daoxu) throws mException
 	{
 		String url = "http://c.tieba.baidu.com/c/f/pb/page";
 		String data = cookie;
 		data += "&_client_id=" + getStamp();
 		data += "&_client_type=2&_client_version=8.8.8.3";
 		data += "&kz=" + tid;
-		if (daoxu == true) {
+		if(!pid.equals("-1")){
+			data += "&mark=1&pid=" + pid;
+		}
+		else if (daoxu == true) {
 			data += "&last=1&r=1";
 		} else {
 			data += "&pn=" + pn;
