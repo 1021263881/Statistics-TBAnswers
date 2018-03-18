@@ -5,11 +5,11 @@ import java.util.concurrent.*;
 
 public class HttpService
 {
-	public String get(String Url, String data) throws mException 
+	public String get(String Url) throws mException 
 	{
 		//第一种方式
 		ExecutorService executor = Executors.newCachedThreadPool();
-		Task task = new Task("GET", Url, data);
+		Task task = new Task("GET", Url);
 		FutureTask<String> futureTask = new FutureTask<String>(task);
 		executor.submit(futureTask);
 		executor.shutdown();
@@ -52,18 +52,27 @@ public class HttpService
 		private String method;
 		private String Url;
 		private String data;
+
+		Task(String method, String Url)
+		{
+			this.method = method;
+			this.Url = Url;
+			this.data = "";
+		}
+
 		Task(String method, String Url, String data)
 		{
 			this.method = method;
 			this.Url = Url;
 			this.data = data;
 		}
+
 		@Override
 		public String call() throws IOException
 		{
 			switch (method) {
 				case "GET":
-					return Get(Url, data);
+					return Get(Url);
 				case "POST":
 					return Post_(Url, data);
 				default:
@@ -71,16 +80,13 @@ public class HttpService
 			}
 		}
 	}
-	private String Get(String Url, String data)throws  UnsupportedEncodingException, IOException
+	private String Get(String Url)throws  UnsupportedEncodingException, IOException
 	{
 		//string转URL(utf-8)编码
 		//产生UnsupportedEncodingException
-		data = URLEncoder.encode(data, "utf-8");
+		Url = URLEncoder.encode(Url, "utf-8");
 
 		// 新建一个URL对象
-		if (data != "" && data != null) {
-			Url += "?" + data;
-		}
 		URL url = new URL(Url);
 
 		// 打开一个HttpURLConnection连接
@@ -135,7 +141,7 @@ public class HttpService
 		conn.setDoOutput(true);
 		//获取conn的输出流
 		OutputStream os = conn.getOutputStream();
-		
+
 		//将请求体写入到conn的输出流中
 		os.write(data.getBytes());
 		//记得调用输出流的flush方法

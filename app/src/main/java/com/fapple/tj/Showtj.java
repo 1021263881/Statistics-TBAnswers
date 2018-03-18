@@ -92,7 +92,7 @@ public class Showtj extends Activity
 			});
 
 		list = (ListView) findViewById(R.id.showtjlst);
-		
+
 		tjAdapter tjadapter = new tjAdapter(this);
 		list.setAdapter(tjadapter);
 	}
@@ -107,11 +107,12 @@ public class Showtj extends Activity
 	class tjAdapter extends BaseAdapter
 	{
 		private Context context;
-		
-		tjAdapter(Context context){
+
+		tjAdapter(Context context)
+		{
 			this.context = context;
 		}
-		
+
 		@Override
 		public int getCount()
 		{
